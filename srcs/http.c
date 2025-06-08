@@ -1,10 +1,11 @@
 #include "../includes/http.h"
-#include "../includes/server.h"
+#include "../includes/server/server.h"
 
 int main(void)
 {
-    struct sockaddr_in serverAddress;
+    struct sockaddr_in serverAddress, clientAddress;
     int serverSocket;
+    socklen_t clientAddressLength = sizeof(clientAddress);
     
     setup_server_address(&serverAddress);
     serverSocket = create_server_socket();
@@ -13,6 +14,8 @@ int main(void)
     if (start_listening(serverSocket) != 0) return 1;
 
     welcome_message();
+
+    main_handler(serverSocket, &clientAddress, clientAddressLength);
 
     return 0;
 }

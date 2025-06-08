@@ -1,4 +1,4 @@
-#include "../../includes/server.h"
+#include "../../includes/server/server.h"
 
 int setup_server_address(struct sockaddr_in *serverAddress)
 {

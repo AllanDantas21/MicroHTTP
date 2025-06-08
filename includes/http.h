@@ -14,6 +14,7 @@
 #define PORT 8080
 #define BACKLOG 10
 
-void welcome_message(void);
+void welcome_message(void); 
+void main_handler(int serverSocket, struct sockaddr_in *clientAddress, socklen_t clientAddressLength);
 
 #endif
