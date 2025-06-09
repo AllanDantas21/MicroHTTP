@@ -13,10 +13,14 @@
 #include <pthread.h>
 
 #include "constants/constants.h"
+#include "structs/enums.h"
 
-void welcome_message(void); 
 void main_handler(int serverSocket);
 void create_client_thread(int clientSocketFd);
 void *handle_client(void *arg);
+
+/* Logger funcs */
+void logger_message(logger_status status); 
+void welcome_message(void);
 
 #endif
