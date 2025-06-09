@@ -16,5 +16,7 @@
 
 void welcome_message(void); 
 void main_handler(int serverSocket);
+void create_client_thread(int clientSocketFd);
+void *handle_client(void *arg);
 
 #endif

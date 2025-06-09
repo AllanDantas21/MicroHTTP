@@ -12,12 +12,6 @@ void *handle_client(void *arg) {
     return NULL;
 }
 
-void create_client_thread(int clientSocketFd) {
-    pthread_t thread;
-    pthread_create(&thread, NULL, handle_client, (void *)(intptr_t)clientSocketFd);
-    pthread_detach(thread);
-}
-
 void main_handler(int serverSocket) {
     while (42) {
         struct sockaddr_in clientAddress;
