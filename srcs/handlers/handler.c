@@ -1,20 +1,34 @@
 #include "http.h"
 
-static void handle_client_connection(int clientSocket) {
-    (void)clientSocket;
-    printf("mocked handler connection to client %d\n", clientSocket);
+void *handle_client(void *arg) {
+    int clientSocketFd = (int)(intptr_t)arg;
+    char *buffer = malloc(BUFFER_SIZE);
+    
+    recv(clientSocketFd, buffer, BUFFER_SIZE, 0);
+    printf("buffer: %s\n", buffer);
+    
+    close(clientSocketFd);
+    free(buffer);
+    return NULL;
 }
 
-void main_handler(int serverSocket, struct sockaddr_in *clientAddress, socklen_t clientAddressLength) {
-    while (42) {
-        int clientSocket = accept(serverSocket, (struct sockaddr *)clientAddress, &clientAddressLength);
+void create_client_thread(int clientSocketFd) {
+    pthread_t thread;
+    pthread_create(&thread, NULL, handle_client, (void *)(intptr_t)clientSocketFd);
+    pthread_detach(thread);
+}
 
-        if (clientSocket < 0) {
+void main_handler(int serverSocket) {
+    while (42) {
+        struct sockaddr_in clientAddress;
+        socklen_t clientAddressLength = sizeof(clientAddress);
+
+        int clientSocketFd = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
+        if (clientSocketFd < 0) {
             perror("Error accepting connection");
             continue;
         }
 
-        handle_client_connection(clientSocket);
-        close(clientSocket);
+        create_client_thread(clientSocketFd);
     } 
 }

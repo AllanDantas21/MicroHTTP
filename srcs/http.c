@@ -3,9 +3,8 @@
 
 int main(void)
 {
-    struct sockaddr_in serverAddress, clientAddress;
+    struct sockaddr_in serverAddress;
     int serverSocket;
-    socklen_t clientAddressLength = sizeof(clientAddress);
     
     setup_server_address(&serverAddress);
     serverSocket = create_server_socket();
@@ -14,8 +13,7 @@ int main(void)
     if (start_listening(serverSocket) != 0) return 1;
 
     welcome_message();
-
-    main_handler(serverSocket, &clientAddress, clientAddressLength);
+    main_handler(serverSocket);
 
     return 0;
 }

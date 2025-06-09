@@ -10,11 +10,11 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
+#include <pthread.h>
 
-#define PORT 8080
-#define BACKLOG 10
+#include "constants/constants.h"
 
 void welcome_message(void); 
-void main_handler(int serverSocket, struct sockaddr_in *clientAddress, socklen_t clientAddressLength);
+void main_handler(int serverSocket);
 
 #endif
