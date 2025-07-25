@@ -1,4 +1,5 @@
 #include "http.h"
+#include <arpa/inet.h>
 
 int allocate_buffer(char **buffer, size_t size) {
     *buffer = malloc(size);
@@ -9,11 +10,34 @@ int allocate_buffer(char **buffer, size_t size) {
     return -1;
 }
 
+static char* extract_path_from_request(const char* buffer) {
+    static char path[256];
+    char method[16];
+    
+    if (sscanf(buffer, "%15s %255s", method, path) == 2) {
+        return path;
+    }
+    return "/";
+}
+
+static http_status get_response_status(const char* response) {
+    if (strstr(response, "HTTP/1.1 200")) return STATUS_200;
+    if (strstr(response, "HTTP/1.1 405")) return STATUS_405;
+    if (strstr(response, "HTTP/1.1 404")) return STATUS_404;
+    if (strstr(response, "HTTP/1.1 400")) return STATUS_400;
+    if (strstr(response, "HTTP/1.1 500")) return STATUS_500;
+    return STATUS_200;
+}
+
 void *handle_client(void *arg) {
-    int clientSocketFd = (int)(intptr_t)arg;
+    client_info *info = (client_info *)arg;
+    int clientSocketFd = info->clientSocketFd;
+    char *client_ip = info->client_ip;
+    
     char *buffer;
     if (!allocate_buffer(&buffer, BUFFER_SIZE)) {
         close(clientSocketFd);
+        free(info);
         return NULL;
     }
     
@@ -21,12 +45,15 @@ void *handle_client(void *arg) {
     if (bytes_received <= 0) {
         close(clientSocketFd);
         free(buffer);
+        free(info);
         return NULL;
     }
     buffer[bytes_received] = '\0';
     
     char method[16];
     sscanf(buffer, "%15s", method);
+    
+    char* path = extract_path_from_request(buffer);
     
     char *response;
     
@@ -38,10 +65,14 @@ void *handle_client(void *arg) {
         response = handle_unsupported_method(method);
     }
     
+    http_status status = get_response_status(response);
+    log_http_request(method, path, client_ip, status);
+    
     send(clientSocketFd, response, strlen(response), 0);
     
     close(clientSocketFd);
     free(buffer);
+    free(info);
     return NULL;
 }
 
@@ -52,10 +83,15 @@ void main_handler(int serverSocket) {
 
         int clientSocketFd = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
         if (clientSocketFd < 0) {
-            perror("Error accepting connection");
+            log_error("Error accepting connection");
             continue;
         }
 
-        create_client_thread(clientSocketFd);
+        client_info info;
+        info.clientSocketFd = clientSocketFd;
+        inet_ntop(AF_INET, &clientAddress.sin_addr, info.client_ip, INET_ADDRSTRLEN);
+        
+        log_connection(info.client_ip);
+        create_client_thread(&info);
     } 
 }
