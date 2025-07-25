@@ -14,6 +14,7 @@
 
 #include "constants/constants.h"
 #include "structs/enums.h"
+#include "handlers/methods.h"
 
 void main_handler(int serverSocket);
 void create_client_thread(int clientSocketFd);

@@ -17,12 +17,27 @@ void *handle_client(void *arg) {
         return NULL;
     }
     
-    recv(clientSocketFd, buffer, BUFFER_SIZE, 0);
-    const char *response = "HTTP/1.1 200 OK\r\n"
-                          "Content-Type: text/plain\r\n"
-                          "Content-Length: 11\r\n"
-                          "\r\n"
-                          "Hello World!";
+    int bytes_received = recv(clientSocketFd, buffer, BUFFER_SIZE - 1, 0);
+    if (bytes_received <= 0) {
+        close(clientSocketFd);
+        free(buffer);
+        return NULL;
+    }
+    buffer[bytes_received] = '\0';
+    
+    char method[16];
+    sscanf(buffer, "%15s", method);
+    
+    char *response;
+    
+    if (strcmp(method, "GET") == 0) {
+        response = handle_get_request(buffer);
+    } else if (strcmp(method, "POST") == 0) {
+        response = handle_post_request(buffer);
+    } else {
+        response = handle_unsupported_method(method);
+    }
+    
     send(clientSocketFd, response, strlen(response), 0);
     
     close(clientSocketFd);
