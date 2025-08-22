@@ -1,10 +1,11 @@
-## My http server in C
+# MicroHTTP
 
-[Documentation](./docs/main.md)
+This project aims to be a simple and fast HTTP micro framework written in C.
+
 
 ### running project
 ``` sh
-git clone https://github.com/AllanDantas21/http.c.git && cd http.c
+https://github.com/AllanDantas21/MicroHTTP.git && cd MicroHTTP
 
 make && ./webserv
 ```
