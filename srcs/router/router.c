@@ -1,6 +1,5 @@
 #include "http.h"
 #include "router.h"
-#include "routes.h"
 
 typedef struct RouteNode {
 	char method[8];
@@ -10,12 +9,6 @@ typedef struct RouteNode {
 } RouteNode;
 
 static RouteNode* routes_head = NULL;
-
-void build_routes(void) {
-	router_add("GET", "", route_get_root);
-	router_add("GET", "health", route_get_health);
-	router_add("POST", "echo", route_post_echo);
-}
 
 void router_init(void) {
 	routes_head = NULL;

@@ -48,7 +48,6 @@ int httpc_init(void) {
     g_config.on_error = NULL;
     
     router_init();
-    build_routes();
     
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);

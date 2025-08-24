@@ -18,7 +18,6 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/httpc_lib.c \
 	$(SRCS_DIR)/server/server.c \
 	$(SRCS_DIR)/router/router.c \
-	$(SRCS_DIR)/routes/routes.c \
 	$(SRCS_DIR)/handlers/handler.c \
 	$(SRCS_DIR)/handlers/methods/get_handler.c \
 	$(SRCS_DIR)/handlers/methods/post_handler.c \

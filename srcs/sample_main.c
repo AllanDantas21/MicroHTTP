@@ -1,7 +1,6 @@
 #include "../includes/http.h"
 #include "../includes/server/server.h"
 #include "../includes/router.h"
-#include "../includes/routes.h"
 
 int main(void)
 {
@@ -15,7 +14,6 @@ int main(void)
 	if (start_listening(serverSocket) != 0) return 1;
 
 	router_init();
-	build_routes();
 
 	welcome_message();
 	main_handler(serverSocket);
