@@ -1,7 +1,11 @@
 #include "../includes/httpc.h"
+#include "../includes/http.h"
+#include "../includes/server/server.h"
+#include "../includes/constants/constants.h"
+#include "../includes/handlers/methods.h"
 #include <signal.h>
-#include <arpa/inet.h>
-#include <strings.h>
+#include <string.h>
+#include <stdlib.h>
 
 static char* string_dup(const char* str) {
     if (!str) return NULL;
@@ -30,43 +34,21 @@ static void signal_handler(int sig) {
 static void* server_main_loop(void* arg) {
     (void)arg;
     
-    while (g_running) {
-        struct sockaddr_in clientAddress;
-        socklen_t clientAddressLength = sizeof(clientAddress);
-
-        int clientSocketFd = accept(g_server_socket, (struct sockaddr *)&clientAddress, &clientAddressLength);
-        if (clientSocketFd < 0) {
-            if (g_running) {
-                if (g_config.on_error) {
-                    g_config.on_error("Error accepting connection");
-                }
-            }
-            continue;
-        }
-
-        client_info info;
-        info.clientSocketFd = clientSocketFd;
-        inet_ntop(AF_INET, &clientAddress.sin_addr, info.client_ip, INET_ADDRSTRLEN);
-        
-        if (g_config.on_request) {
-            g_config.on_request("CONNECT", info.client_ip, NULL);
-        }
-        
-        create_client_thread(&info);
-    }
+    main_handler(g_server_socket);
     
     return NULL;
 }
 
 int httpc_init(void) {
-    g_config.port = 8080;
-    g_config.backlog = 10;
-    g_config.max_clients = 10;
+    g_config.port = PORT;
+    g_config.backlog = BACKLOG;
+    g_config.max_clients = MAX_CLIENTS;
     g_config.host = "127.0.0.1";
     g_config.on_request = NULL;
     g_config.on_error = NULL;
     
     router_init();
+    build_routes();
     
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
@@ -80,15 +62,15 @@ int httpc_configure(const httpc_config_t* config) {
     g_config = *config;
     
     if (g_config.port <= 0 || g_config.port > 65535) {
-        g_config.port = 8080;
+        g_config.port = PORT;
     }
     
     if (g_config.backlog <= 0) {
-        g_config.backlog = 10;
+        g_config.backlog = BACKLOG;
     }
     
     if (g_config.max_clients <= 0) {
-        g_config.max_clients = 10;
+        g_config.max_clients = MAX_CLIENTS;
     }
     
     return 0;
@@ -104,11 +86,14 @@ int httpc_add_route(const char* method, const char* path, route_handler handler)
 int httpc_start(void) {
     struct sockaddr_in serverAddress;
     
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(g_config.port);
-    serverAddress.sin_addr.s_addr = inet_addr(g_config.host);
+    if (setup_server_address(&serverAddress, g_config.port) != 0) {
+        if (g_config.on_error) {
+            g_config.on_error("Failed to setup server address");
+        }
+        return -1;
+    }
     
-    g_server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    g_server_socket = create_server_socket();
     if (g_server_socket < 0) {
         if (g_config.on_error) {
             g_config.on_error("Failed to create server socket");
@@ -116,10 +101,7 @@ int httpc_start(void) {
         return -1;
     }
     
-    int opt = 1;
-    setsockopt(g_server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-        
-    if (bind(g_server_socket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+    if (bind_server_socket(g_server_socket, &serverAddress) != 0) {
         if (g_config.on_error) {
             g_config.on_error("Failed to bind server socket");
         }
@@ -127,7 +109,7 @@ int httpc_start(void) {
         return -1;
     }
     
-    if (listen(g_server_socket, g_config.backlog) < 0) {
+    if (start_listening(g_server_socket, g_config.backlog) != 0) {
         if (g_config.on_error) {
             g_config.on_error("Failed to start listening");
         }
@@ -146,7 +128,6 @@ int httpc_start(void) {
     }
     
     printf("HTTP.c server started on %s:%d\n", g_config.host, g_config.port);
-    
     return 0;
 }
 
@@ -165,7 +146,6 @@ int httpc_stop(void) {
     }
     
     printf("HTTP.c server stopped\n");
-    
     return 0;
 }
 

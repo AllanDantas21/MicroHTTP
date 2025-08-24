@@ -1,9 +1,9 @@
 #include "../../includes/server/server.h"
 
-int setup_server_address(struct sockaddr_in *serverAddress)
+int setup_server_address(struct sockaddr_in *serverAddress, int port)
 {
     serverAddress->sin_family = AF_INET;
-    serverAddress->sin_port = htons(PORT);
+    serverAddress->sin_port = htons(port);
     serverAddress->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     return 0;
 }
@@ -24,9 +24,9 @@ int bind_server_socket(int serverSocket, struct sockaddr_in *serverAddress)
     return 0;
 }
 
-int start_listening(int serverSocket)
+int start_listening(int serverSocket, int backlog)
 {
-    if (listen(serverSocket, BACKLOG) < 0) {
+    if (listen(serverSocket, backlog) < 0) {
         printf("Error: The server is not listening.\n");
         return 1;
     }

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <signal.h>
 
-// Handlers das rotas
 char* handle_home(const char* buffer) {
     (void)buffer;
     return "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 89\r\n\r\n<html><body><h1>Bem-vindo ao HTTP.c!</h1><p>Um micro framework HTTP em C</p></body></html>";
@@ -16,7 +15,6 @@ char* handle_api_status(const char* buffer) {
 char* handle_echo(const char* buffer) {
     static char response[1024];
     
-    // Extrair corpo da requisição POST
     char *body = strstr(buffer, "\r\n\r\n");
     if (body) body += 4;
     
@@ -39,7 +37,6 @@ char* handle_echo(const char* buffer) {
     return response;
 }
 
-// Callbacks de eventos
 void on_request(const char* method, const char* path, const char* body) {
     printf("[INFO] %s %s\n", method, path);
     if (body && strlen(body) > 0) {
@@ -55,13 +52,11 @@ int main(void) {
     printf("=== HTTP.c Micro Framework ===\n");
     printf("Iniciando servidor...\n");
     
-    // Inicializar a biblioteca
     if (httpc_init() != 0) {
         fprintf(stderr, "Erro ao inicializar HTTP.c\n");
         return 1;
     }
     
-    // Configurar o servidor
     httpc_config_t config = {
         .port = 8080,
         .backlog = 10,
@@ -76,12 +71,10 @@ int main(void) {
         return 1;
     }
     
-    // Adicionar rotas
     httpc_add_route("GET", "", handle_home);
     httpc_add_route("GET", "status", handle_api_status);
     httpc_add_route("POST", "echo", handle_echo);
     
-    // Iniciar o servidor
     if (httpc_start() != 0) {
         fprintf(stderr, "Erro ao iniciar servidor\n");
         return 1;
@@ -90,13 +83,10 @@ int main(void) {
     printf("Servidor rodando em http://%s:%d\n", config.host, config.port);
     printf("Pressione Ctrl+C para parar\n");
     
-    // Loop principal - aguardar sinal de parada
     while (1) {
         sleep(1);
     }
     
-    // Limpeza (não será executado normalmente devido ao loop infinito)
     httpc_cleanup();
-    
     return 0;
 }

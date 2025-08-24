@@ -127,10 +127,6 @@ char* httpc_response_to_string(const httpc_response_t* response);
  */
 void httpc_set_header(httpc_response_t* response, const char* key, const char* value);
 
-// ============================================================================
-// MACROS ÚTEIS
-// ============================================================================
-
 #define HTTPC_GET(path, handler) httpc_add_route("GET", path, handler)
 #define HTTPC_POST(path, handler) httpc_add_route("POST", path, handler)
 #define HTTPC_PUT(path, handler) httpc_add_route("PUT", path, handler)
