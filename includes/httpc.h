@@ -127,6 +127,24 @@ char* httpc_response_to_string(const httpc_response_t* response);
  */
 void httpc_set_header(httpc_response_t* response, const char* key, const char* value);
 
+/**
+ * @brief Verifica se o servidor está rodando
+ * @return 1 se estiver rodando, 0 caso contrário
+ */
+int httpc_is_running(void);
+
+/**
+ * @brief Obtém a configuração atual do servidor
+ * @return Ponteiro para a configuração atual
+ */
+const httpc_config_t* httpc_get_config(void);
+
+/**
+ * @brief Obtém o socket do servidor
+ * @return Descritor do socket ou -1 se não estiver ativo
+ */
+int httpc_get_server_socket(void);
+
 #define HTTPC_GET(path, handler) httpc_add_route("GET", path, handler)
 #define HTTPC_POST(path, handler) httpc_add_route("POST", path, handler)
 #define HTTPC_PUT(path, handler) httpc_add_route("PUT", path, handler)

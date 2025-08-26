@@ -15,7 +15,7 @@ LIB_DIR = lib
 INCLUDE_DIR = includes
 
 HTTPC_SOURCES = \
-	$(SRCS_DIR)/httpc_lib.c \
+	$(SRCS_DIR)/api/httpc_lib.c \
 	$(SRCS_DIR)/server/server.c \
 	$(SRCS_DIR)/router/router.c \
 	$(SRCS_DIR)/handlers/handler.c \
@@ -35,6 +35,7 @@ all: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so examples
 
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
+	mkdir -p $(OBJS_DIR)/api
 	mkdir -p $(OBJS_DIR)/server
 	mkdir -p $(OBJS_DIR)/router
 	mkdir -p $(OBJS_DIR)/routes
@@ -58,7 +59,7 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
 examples: $(EXAMPLES)
 
 examples/simple_server: examples/simple_server.c $(LIB_DIR)/$(LIB_NAME).a
-	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -lpthread
+	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -lpthread -Wl,-rpath,$(shell pwd)/$(LIB_DIR)
 
 install: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so
 	install -d $(DESTDIR)/usr/local/lib

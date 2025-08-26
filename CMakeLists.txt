@@ -41,7 +41,6 @@ if(BUILD_EXAMPLES)
     add_executable(simple_example examples/simple_server.c)
     target_link_libraries(simple_example httpc_static)
     
-    add_executable(original_example srcs/http.c)
     target_link_libraries(original_example httpc_static)
 endif()
 
