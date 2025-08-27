@@ -1,5 +1,7 @@
-#include "http.h"
-#include "router.h"
+#include "../../includes/http.h"
+#include "../../includes/router.h"
+#include "../../includes/httpc.h"
+#include <errno.h>
 
 typedef struct RouteNode {
 	char method[8];
@@ -40,4 +42,15 @@ route_handler router_match(const char* method, const char* route) {
 		}
 	}
 	return NULL;
+}
+
+int httpc_add_route(const char* method, const char* path, route_handler handler) {
+    if (!method || !path || !handler) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    router_add(method, path, handler);
+    
+    return 0;
 }

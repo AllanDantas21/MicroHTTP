@@ -16,6 +16,9 @@ INCLUDE_DIR = includes
 
 HTTPC_SOURCES = \
 	$(SRCS_DIR)/api/httpc_lib.c \
+	$(SRCS_DIR)/api/response.c \
+	$(SRCS_DIR)/core/config.c \
+	$(SRCS_DIR)/core/utils.c \
 	$(SRCS_DIR)/server/server.c \
 	$(SRCS_DIR)/router/router.c \
 	$(SRCS_DIR)/handlers/handler.c \
@@ -36,11 +39,15 @@ all: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so examples
 $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
 	mkdir -p $(OBJS_DIR)/api
+	mkdir -p $(OBJS_DIR)/core
 	mkdir -p $(OBJS_DIR)/server
 	mkdir -p $(OBJS_DIR)/router
 	mkdir -p $(OBJS_DIR)/routes
 	mkdir -p $(OBJS_DIR)/handlers
 	mkdir -p $(OBJS_DIR)/handlers/methods
+	mkdir -p $(OBJS_DIR)/handlers/threads
+	mkdir -p $(OBJS_DIR)/logger
+	mkdir -p $(OBJS_DIR)/logger/messages
 
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
