@@ -7,7 +7,7 @@ int allocate_buffer(char **buffer, size_t size) {
         perror("Failed to allocate memory for buffer");
         return 0;
     }
-    return -1;
+    return 1;
 }
 
 static char* extract_path_from_request(const char* buffer) {

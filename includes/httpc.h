@@ -69,13 +69,15 @@ int httpc_start(void);
 int httpc_stop(void);
 
 /**
+ * @brief Executa o servidor em loop até receber sinal de parada
+ * @return 0 em caso de sucesso, -1 em caso de erro
+ */
+int httpc_run(void);
+
+/**
  * @brief Limpa recursos da biblioteca
  */
 void httpc_cleanup(void);
-
-// ============================================================================
-// FUNÇÕES AUXILIARES
-// ============================================================================
 
 /**
  * @brief Cria uma resposta HTTP
@@ -131,4 +133,4 @@ int httpc_get_server_socket(void);
 }
 #endif
 
-#endif // HTTPC_H
+#endif

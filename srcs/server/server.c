@@ -47,6 +47,11 @@ int start_listening(int serverSocket, int backlog)
 
 static void signal_handler(int sig) {
     if (sig == SIGINT || sig == SIGTERM) {
+        const httpc_config_t* config = httpc_get_config();
+        if (config && config->on_request) {
+            config->on_request("SERVER", "STOPPING", "Received interrupt signal");
+        }
+        
         g_running = 0;
         
         if (g_server_socket != -1) {
@@ -158,5 +163,43 @@ int httpc_get_server_socket(void) {
 int httpc_setup_signals(void) {
     if (signal(SIGINT, signal_handler) == SIG_ERR) { return (-1);}
     if (signal(SIGTERM, signal_handler) == SIG_ERR) { return (-1); }
+    return (0);
+}
+
+int httpc_run(void) {
+    const httpc_config_t* config = httpc_get_config();
+    
+    if (!g_running) {
+        if (config && config->on_error) {
+            config->on_error("Server is not running. Call httpc_start() first.");
+        }
+        return (-1);
+    }
+    
+    if (httpc_setup_signals() != 0) {
+        if (config && config->on_error) {
+            config->on_error("Failed to setup signal handlers");
+        }
+        return (-1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "RUNNING", "Server loop started");
+    }
+    
+    printf("Servidor rodando em http://%s:%d\n", config->host, config->port);
+    printf("Pressione Ctrl+C para parar\n");
+    
+    while (g_running) {
+        sleep(1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "STOPPED", "Server loop ended");
+    }
+    
+    httpc_cleanup();
+    printf("[INFO] Servidor finalizado com sucesso\n");
+    
     return (0);
 }

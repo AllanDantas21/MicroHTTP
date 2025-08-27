@@ -1,6 +1,5 @@
 #include "../includes/httpc.h"
 #include <stdio.h>
-#include <signal.h>
 
 char* handle_home(const char* buffer) {
     (void)buffer;
@@ -48,6 +47,8 @@ void on_error(const char* error) {
     fprintf(stderr, "[ERROR] %s\n", error);
 }
 
+
+
 int main(void) {
     printf("=== HTTP.c Micro Framework ===\n");
     printf("Iniciando servidor...\n");
@@ -68,6 +69,7 @@ int main(void) {
     
     if (httpc_configure(&config) != 0) {
         fprintf(stderr, "Erro ao configurar servidor\n");
+        httpc_cleanup();
         return 1;
     }
     
@@ -77,16 +79,10 @@ int main(void) {
     
     if (httpc_start() != 0) {
         fprintf(stderr, "Erro ao iniciar servidor\n");
+        httpc_cleanup();
         return 1;
     }
     
-    printf("Servidor rodando em http://%s:%d\n", config.host, config.port);
-    printf("Pressione Ctrl+C para parar\n");
-    
-    while (1) {
-        sleep(1);
-    }
-    
-    httpc_cleanup();
-    return 0;
+    // O framework agora encapsula o loop do servidor e controle de sinais
+    return httpc_run();
 }

@@ -38,6 +38,19 @@ route_handler router_match(const char* method, const char* route) {
 	return NULL;
 }
 
+void router_cleanup(void) {
+	RouteNode* current = routes_head;
+	RouteNode* next;
+	
+	while (current != NULL) {
+		next = current->next;
+		free(current);
+		current = next;
+	}
+	
+	routes_head = NULL;
+}
+
 int httpc_add_route(const char* method, const char* path, route_handler handler) {
     if (!method || !path || !handler) {
         errno = EINVAL;

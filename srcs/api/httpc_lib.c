@@ -13,4 +13,5 @@ int httpc_init(void) {
 
 void httpc_cleanup(void) {
     httpc_stop();
+    router_cleanup();
 }
