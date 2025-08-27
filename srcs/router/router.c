@@ -1,14 +1,8 @@
 #include "../../includes/http.h"
 #include "../../includes/router.h"
 #include "../../includes/httpc.h"
+#include "../../includes/structs/route.h"
 #include <errno.h>
-
-typedef struct RouteNode {
-	char method[8];
-	char route[256];
-	route_handler handler;
-	struct RouteNode* next;
-} RouteNode;
 
 static RouteNode* routes_head = NULL;
 

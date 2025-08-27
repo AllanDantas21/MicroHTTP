@@ -14,9 +14,7 @@ int main(void)
 	if (start_listening(serverSocket) != 0) return 1;
 
 	router_init();
-
 	welcome_message();
 	main_handler(serverSocket);
-
 	return 0;
 }

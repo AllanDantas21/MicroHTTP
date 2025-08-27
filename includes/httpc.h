@@ -21,7 +21,9 @@
 #include <pthread.h>
 
 #include "constants/constants.h"
+#include "constants/macros.h"
 #include "structs/enums.h"
+#include "structs/httpc.h"
 #include "handlers/methods.h"
 #include "router.h"
 #include "server/server.h"
@@ -30,29 +32,7 @@
 extern "C" {
 #endif
 
-typedef struct {
-    int port;
-    int backlog;
-    int max_clients;
-    char* host;
-    void (*on_request)(const char* method, const char* path, const char* body);
-    void (*on_error)(const char* error);
-} httpc_config_t;
 
-typedef struct {
-    int status_code;
-    char* content_type;
-    char* body;
-    char* headers;
-} httpc_response_t;
-
-typedef struct {
-    char* method;
-    char* path;
-    char* body;
-    char* headers;
-    char* query_string;
-} httpc_request_t;
 
 /**
  * @brief Inicializa a biblioteca HTTP.c
@@ -145,17 +125,7 @@ const httpc_config_t* httpc_get_config(void);
  */
 int httpc_get_server_socket(void);
 
-#define HTTPC_GET(path, handler) httpc_add_route("GET", path, handler)
-#define HTTPC_POST(path, handler) httpc_add_route("POST", path, handler)
-#define HTTPC_PUT(path, handler) httpc_add_route("PUT", path, handler)
-#define HTTPC_DELETE(path, handler) httpc_add_route("DELETE", path, handler)
-#define HTTPC_PATCH(path, handler) httpc_add_route("PATCH", path, handler)
 
-#define HTTPC_OK(response) httpc_create_response(200, "text/plain", response)
-#define HTTPC_CREATED(response) httpc_create_response(201, "text/plain", response)
-#define HTTPC_NOT_FOUND(response) httpc_create_response(404, "text/plain", response)
-#define HTTPC_BAD_REQUEST(response) httpc_create_response(400, "text/plain", response)
-#define HTTPC_INTERNAL_ERROR(response) httpc_create_response(500, "text/plain", response)
 
 #ifdef __cplusplus
 }

@@ -5,8 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DEFAULT_HOST "127.0.0.1"
-
 static httpc_config_t g_config = {0};
 
 static int validate_config(const httpc_config_t* config) {
