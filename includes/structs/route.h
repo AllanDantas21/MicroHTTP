@@ -1,7 +1,7 @@
 #ifndef ROUTE_H
 #define ROUTE_H
 
-#include "../router.h"
+typedef char* (*route_handler)(const char* buffer);
 
 typedef struct RouteNode {
 	char method[8];
@@ -9,5 +9,9 @@ typedef struct RouteNode {
 	route_handler handler;
 	struct RouteNode* next;
 } RouteNode;
+
+typedef struct Router {
+	RouteNode* routes_head;
+} Router;
 
 #endif

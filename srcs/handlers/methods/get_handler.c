@@ -1,6 +1,7 @@
 #include "http.h"
 #include "handlers/methods.h"
 #include "router.h"
+#include "httpc.h"
 
 char* handle_get_request(const char* buffer) {
 	static char response_buffer[BUFFER_SIZE];
@@ -20,11 +21,9 @@ char* handle_get_request(const char* buffer) {
 
 	const char* route = (path[0] == '/') ? path + 1 : path;
 
-	route_handler h = router_match("GET", route);
-	if (h) {
-        return h(buffer);
-    }
-
+	route_handler h = router_match(&g_router, "GET", route);
+	if (h) { return h(buffer); }
+	
 	const char* body = "Not Found";
 	snprintf(response_buffer, sizeof(response_buffer),
 		 "HTTP/1.1 404 Not Found\r\n"

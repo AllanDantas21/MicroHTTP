@@ -13,7 +13,6 @@ int main(void)
 	if (bind_server_socket(serverSocket, &serverAddress) != 0) return 1;
 	if (start_listening(serverSocket) != 0) return 1;
 
-	router_init();
 	welcome_message();
 	main_handler(serverSocket);
 	return 0;

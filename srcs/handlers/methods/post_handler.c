@@ -1,6 +1,7 @@
 #include "http.h"
 #include "handlers/methods.h"
 #include "router.h"
+#include "httpc.h"
 
 char* handle_post_request(const char* buffer) {
 	static char response_buffer[BUFFER_SIZE];
@@ -20,7 +21,7 @@ char* handle_post_request(const char* buffer) {
 
 	const char* route = (path[0] == '/') ? path + 1 : path;
 
-	route_handler h = router_match("POST", route);
+	route_handler h = router_match(&g_router, "POST", route);
 	if (h) return h(buffer);
 
 	const char* msg = "Not Found";

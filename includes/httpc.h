@@ -32,7 +32,8 @@
 extern "C" {
 #endif
 
-
+// Instância global do router
+extern Router g_router;
 
 /**
  * @brief Inicializa a biblioteca HTTP.c
@@ -49,12 +50,13 @@ int httpc_configure(const httpc_config_t* config);
 
 /**
  * @brief Adiciona uma rota ao servidor
+ * @param router Ponteiro para a instância do router
  * @param method Método HTTP (GET, POST, PUT, DELETE, etc.)
  * @param path Caminho da rota
  * @param handler Função que processa a requisição
  * @return 0 em caso de sucesso, -1 em caso de erro
  */
-int httpc_add_route(const char* method, const char* path, route_handler handler);
+int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler);
 
 /**
  * @brief Inicia o servidor HTTP

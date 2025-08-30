@@ -47,8 +47,6 @@ void on_error(const char* error) {
     fprintf(stderr, "[ERROR] %s\n", error);
 }
 
-
-
 int main(void) {
     printf("=== HTTP.c Micro Framework ===\n");
     printf("Iniciando servidor...\n");
@@ -73,9 +71,9 @@ int main(void) {
         return 1;
     }
     
-    httpc_add_route("GET", "", handle_home);
-    httpc_add_route("GET", "status", handle_api_status);
-    httpc_add_route("POST", "echo", handle_echo);
+    httpc_add_route(&g_router, "GET", "", handle_home);
+    httpc_add_route(&g_router, "GET", "status", handle_api_status);
+    httpc_add_route(&g_router, "POST", "echo", handle_echo);
     
     if (httpc_start() != 0) {
         fprintf(stderr, "Erro ao iniciar servidor\n");
@@ -83,6 +81,5 @@ int main(void) {
         return 1;
     }
     
-    // O framework agora encapsula o loop do servidor e controle de sinais
     return httpc_run();
 }

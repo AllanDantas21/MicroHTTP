@@ -4,60 +4,54 @@
 #include "../../includes/structs/route.h"
 #include <errno.h>
 
-static RouteNode* routes_head = NULL;
+void router_add(Router* router, const char* method, const char* route, route_handler handler) {
+	if (!router || !method || !route || !handler) return;
 
-void router_init(void) {
-	routes_head = NULL;
-}
-
-void router_add(const char* method, const char* route, route_handler handler) {
-	if (!method || !route || !handler) return;
-
-	RouteNode* node = (RouteNode*)malloc(sizeof(RouteNode));
-	if (!node) {
-		return;
-	}
+	RouteNode* node = malloc(sizeof(RouteNode));
+	if (!node) { return; }
 
 	strncpy(node->method, method, sizeof(node->method) - 1);
 	node->method[sizeof(node->method) - 1] = '\0';
-
 	strncpy(node->route, route, sizeof(node->route) - 1);
 	node->route[sizeof(node->route) - 1] = '\0';
 
 	node->handler = handler;
-	node->next = routes_head;
-	routes_head = node;
+	node->next = router->routes_head;
+	router->routes_head = node;
 }
 
-route_handler router_match(const char* method, const char* route) {
-	for (RouteNode* it = routes_head; it; it = it->next) {
+route_handler router_match(Router* router, const char* method, const char* route) {
+	if (!router) return NULL;
+	
+	for (RouteNode* it = router->routes_head; it; it = it->next) {
 		if (strcmp(it->method, method) == 0 && strcmp(it->route, route) == 0) {
 			return it->handler;
 		}
 	}
-	return NULL;
+	return (NULL);
 }
 
-void router_cleanup(void) {
-	RouteNode* current = routes_head;
+void router_cleanup(Router* router) {
+	if (!router) return;
+	
+	RouteNode* curr = router->routes_head;
 	RouteNode* next;
 	
-	while (current != NULL) {
-		next = current->next;
-		free(current);
-		current = next;
+	while (curr != NULL) {
+		next = curr->next;
+		free(curr);
+		curr = next;
 	}
 	
-	routes_head = NULL;
+	router->routes_head = NULL;
 }
 
-int httpc_add_route(const char* method, const char* path, route_handler handler) {
-    if (!method || !path || !handler) {
+int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler) {
+    if (!router || !method || !path || !handler) {
         errno = EINVAL;
-        return -1;
+        return (-1);
     }
     
-    router_add(method, path, handler);
-    
-    return 0;
+    router_add(router, method, path, handler);
+    return (0);
 }
