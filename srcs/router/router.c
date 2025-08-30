@@ -2,13 +2,20 @@
 #include "../../includes/router.h"
 #include "../../includes/httpc.h"
 #include "../../includes/structs/route.h"
+#include <stdbool.h>
 #include <errno.h>
 
-void router_add(Router* router, const char* method, const char* route, route_handler handler) {
-	if (!router || !method || !route || !handler) return;
+static char* normalize_route(const char* route) {
+	if (!route) return NULL;
+	
+	while (*route == '/') { route++; }
+	if (*route == '\0') { return ""; }
+	return (char*)route;
+}
 
+static bool copy_node(Router* router, const char* method, const char* route, route_handler handler) {
 	RouteNode* node = malloc(sizeof(RouteNode));
-	if (!node) { return; }
+	if (!node) { return false; }
 
 	strncpy(node->method, method, sizeof(node->method) - 1);
 	node->method[sizeof(node->method) - 1] = '\0';
@@ -18,6 +25,14 @@ void router_add(Router* router, const char* method, const char* route, route_han
 	node->handler = handler;
 	node->next = router->routes_head;
 	router->routes_head = node;
+	return true;
+}
+
+void router_add(Router* router, const char* method, const char* route, route_handler handler) {
+	if (!router || !method || !route || !handler) return;
+
+	route = normalize_route(route);
+	if(!copy_node(router, method, route, handler)) { return; }
 }
 
 route_handler router_match(Router* router, const char* method, const char* route) {

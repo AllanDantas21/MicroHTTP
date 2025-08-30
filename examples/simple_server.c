@@ -48,9 +48,6 @@ void on_error(const char* error) {
 }
 
 int main(void) {
-    printf("=== HTTP.c Micro Framework ===\n");
-    printf("Iniciando servidor...\n");
-    
     if (httpc_init() != 0) {
         fprintf(stderr, "Erro ao inicializar HTTP.c\n");
         return 1;
