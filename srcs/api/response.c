@@ -1,12 +1,13 @@
 #include "../../includes/api/response.h"
 #include "../../includes/core/utils.h"
+#include "../../includes/http.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 httpc_response_t* httpc_create_response(int status_code, const char* content_type, const char* body) {
     httpc_response_t* response = malloc(sizeof(httpc_response_t));
-    if (!response) {
+    if (handle_memory_error(response, __func__, __LINE__) == NULL) {
         return NULL;
     }
     
@@ -56,7 +57,7 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     total_size += strlen(response->body);
     
     char* result = malloc(total_size + 1);
-    if (!result) {
+    if (handle_memory_error(result, __func__, __LINE__) == NULL) {
         return NULL;
     }
     
@@ -91,7 +92,7 @@ void httpc_set_header(httpc_response_t* response, const char* key, const char* v
         size_t new_size = current_size + header_size;
         
         char* new_headers = realloc(response->headers, new_size + 1);
-        if (!new_headers) {
+        if (handle_memory_error(new_headers, __func__, __LINE__) == NULL) {
             return;
         }
         
@@ -99,7 +100,7 @@ void httpc_set_header(httpc_response_t* response, const char* key, const char* v
         sprintf(response->headers + current_size, "%s: %s\r\n", key, value);
     } else {
         response->headers = malloc(header_size + 1);
-        if (!response->headers) {
+        if (handle_memory_error(response->headers, __func__, __LINE__) == NULL) {
             return;
         }
         

@@ -1,4 +1,5 @@
 #include "../includes/httpc.h"
+#include "../includes/http.h"
 #include <stdio.h>
 
 char* handle_home(const char* buffer) {
@@ -48,8 +49,12 @@ void on_error(const char* error) {
 }
 
 int main(void) {
+    if (init_logger_system() < 0) {
+        return 1;
+    }
+    
     if (httpc_init() != 0) {
-        fprintf(stderr, "Erro ao inicializar HTTP.c\n");
+        cleanup_logger_system();
         return 1;
     }
     
@@ -63,7 +68,7 @@ int main(void) {
     };
     
     if (httpc_configure(&config) != 0) {
-        fprintf(stderr, "Erro ao configurar servidor\n");
+        cleanup_logger_system();
         httpc_cleanup();
         return 1;
     }
@@ -73,10 +78,12 @@ int main(void) {
     httpc_add_route(&g_router, "POST", "echo", handle_echo);
     
     if (httpc_start() != 0) {
-        fprintf(stderr, "Erro ao iniciar servidor\n");
+        cleanup_logger_system();
         httpc_cleanup();
         return 1;
     }
     
-    return httpc_run();
+    int result = httpc_run();
+    cleanup_logger_system();
+    return result;
 }
