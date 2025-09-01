@@ -37,24 +37,8 @@ char* handle_echo(const char* buffer) {
     return response;
 }
 
-void on_request(const char* method, const char* path, const char* body) {
-    printf("[INFO] %s %s\n", method, path);
-    if (body && strlen(body) > 0) {
-        printf("[BODY] %s\n", body);
-    }
-}
-
-void on_error(const char* error) {
-    fprintf(stderr, "[ERROR] %s\n", error);
-}
-
 int main(void) {
-    if (init_logger_system() < 0) {
-        return 1;
-    }
-    
     if (httpc_init() != 0) {
-        cleanup_logger_system();
         return 1;
     }
     
@@ -62,13 +46,10 @@ int main(void) {
         .port = 8080,
         .backlog = 10,
         .max_clients = 10,
-        .host = "127.0.0.1",
-        .on_request = on_request,
-        .on_error = on_error
+        .host = "127.0.0.1"
     };
     
     if (httpc_configure(&config) != 0) {
-        cleanup_logger_system();
         httpc_cleanup();
         return 1;
     }
@@ -78,12 +59,11 @@ int main(void) {
     httpc_add_route(&g_router, "POST", "echo", handle_echo);
     
     if (httpc_start() != 0) {
-        cleanup_logger_system();
         httpc_cleanup();
         return 1;
     }
     
     int result = httpc_run();
-    cleanup_logger_system();
+    httpc_cleanup();
     return result;
 }

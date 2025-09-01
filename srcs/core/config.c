@@ -1,11 +1,26 @@
 #include "../../includes/core/config.h"
 #include "../../includes/httpc.h"
 #include "../../includes/constants/constants.h"
+#include "../../includes/logger.h"
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static httpc_config_t g_config = {0};
+
+static void default_on_request(const char* method, const char* path, const char* body) {
+    log_info("Request received");
+    printf("[INFO] %s %s\n", method, path);
+    if (body && strlen(body) > 0) {
+        printf("[BODY] %s\n", body);
+    }
+}
+
+static void default_on_error(const char* error) {
+    log_error(error);
+    fprintf(stderr, "[ERROR] %s\n", error);
+}
 
 static int validate_config(const httpc_config_t* config) {
     if (!config) return (-1);
@@ -30,7 +45,7 @@ static void apply_default_config(httpc_config_t* config) {
     if (config->max_clients <= 0) {
         config->max_clients = MAX_CLIENTS;
     }
-    
+
     if (!config->host) {
         config->host = DEFAULT_HOST;
     }
@@ -49,7 +64,7 @@ int httpc_configure(const httpc_config_t* config) {
     
     g_config = *config;
     apply_default_config(&g_config);
-    
+
     return (0);
 }
 
@@ -62,6 +77,6 @@ void httpc_init_default_config(void) {
     g_config.backlog = BACKLOG;
     g_config.max_clients = MAX_CLIENTS;
     g_config.host = DEFAULT_HOST;
-    g_config.on_request = NULL;
-    g_config.on_error = NULL;
+    g_config.on_request = default_on_request;
+    g_config.on_error = default_on_error;
 }

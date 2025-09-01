@@ -26,7 +26,6 @@ httpc_response_t* httpc_create_response(int status_code, const char* content_typ
 
 void httpc_free_response(httpc_response_t* response) {
     if (!response) return;
-    
     free(response->content_type);
     free(response->body);
     free(response->headers);
@@ -39,7 +38,6 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     }
     
     const char* status_text = get_status_text(response->status_code);
-    
     size_t total_size = 0;
     
     total_size += snprintf(NULL, 0, "HTTP/1.1 %d %s\r\n", response->status_code, status_text);
