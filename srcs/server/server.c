@@ -2,6 +2,8 @@
 #include "../../includes/httpc.h"
 #include "../../includes/handlers/methods.h"
 #include "../../includes/core/config.h"
+#include "../../includes/error_handling.h"
+#include "../../includes/logger.h"
 #include <signal.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -23,14 +25,17 @@ int setup_server_address(struct sockaddr_in *serverAddress, int port)
 int create_server_socket(void)
 {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (handle_socket_error(serverSocket, __func__, __LINE__) < 0) {
+        return -1;
+    }
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
     return (serverSocket);
 }
 
 int bind_server_socket(int serverSocket, struct sockaddr_in *serverAddress)
 {
-    if (bind(serverSocket, (struct sockaddr *)serverAddress, sizeof(*serverAddress)) < 0) {
-        printf("Error: The server is not bound to the address.\n");
+    int bind_result = bind(serverSocket, (struct sockaddr *)serverAddress, sizeof(*serverAddress));
+    if (handle_bind_error(bind_result, __func__, __LINE__) < 0) {
         return (-1);
     }
     return (0);
@@ -38,8 +43,8 @@ int bind_server_socket(int serverSocket, struct sockaddr_in *serverAddress)
 
 int start_listening(int serverSocket, int backlog)
 {
-    if (listen(serverSocket, backlog) < 0) {
-        printf("Error: The server is not listening.\n");
+    int listen_result = listen(serverSocket, backlog);
+    if (handle_listen_error(listen_result, __func__, __LINE__) < 0) {
         return (-1);
     }
     return (0);
@@ -91,25 +96,16 @@ int httpc_start(void) {
     
     g_server_socket = create_server_socket();
     if (g_server_socket < 0) {
-        if (config->on_error) {
-            config->on_error("Failed to create server socket");
-        }
         return (-1);
     }
     
     if (bind_server_socket(g_server_socket, &serverAddress) != 0) {
-        if (config->on_error) {
-            config->on_error("Failed to bind server socket");
-        }
         close(g_server_socket);
         g_server_socket = -1;
         return (-1);
     }
     
     if (start_listening(g_server_socket, config->backlog) != 0) {
-        if (config->on_error) {
-            config->on_error("Failed to start listening");
-        }
         close(g_server_socket);
         g_server_socket = -1;
         return (-1);
@@ -117,19 +113,43 @@ int httpc_start(void) {
     
     g_running = 1;
     
-    if (pthread_create(&g_main_thread, NULL, server_main_loop, NULL) != 0) {
-        if (config->on_error) {
-            config->on_error("Failed to create server thread");
-        }
+    int thread_result = pthread_create(&g_main_thread, NULL, server_main_loop, NULL);
+    if (handle_thread_error(thread_result, __func__, __LINE__) < 0) {
         close(g_server_socket);
         g_server_socket = -1;
         g_running = 0;
         return (-1);
     }
     
-    printf("HTTP.c server started on %s:%d\n", config->host, config->port);
+    if (httpc_setup_signals() != 0) {
+        if (config->on_error) {
+            config->on_error("Failed to setup signal handlers");
+        }
+        httpc_stop();
+        return (-1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "RUNNING", "Server loop started");
+    }
+    
+    server_welcome_message(config->host, config->port);
+    
+    while (g_running) {
+        sleep(1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "STOPPED", "Server loop ended");
+    }
+    
+    httpc_stop();
+    log_success("Server stopped successfully");
+    
+    httpc_cleanup();
     return (0);
 }
+
 
 int httpc_stop(void) {
     if (!g_running) {
@@ -161,8 +181,18 @@ int httpc_get_server_socket(void) {
 }
 
 int httpc_setup_signals(void) {
-    if (signal(SIGINT, signal_handler) == SIG_ERR) { return (-1);}
-    if (signal(SIGTERM, signal_handler) == SIG_ERR) { return (-1); }
+    __sighandler_t sigint_result = signal(SIGINT, signal_handler);
+    if (sigint_result == SIG_ERR) { 
+        debug_error_detailed(__func__, __LINE__, errno, "Failed to configure handler for SIGINT");
+        return (-1);
+    }
+    
+    __sighandler_t sigterm_result = signal(SIGTERM, signal_handler);
+    if (sigterm_result == SIG_ERR) { 
+        debug_error_detailed(__func__, __LINE__, errno, "Failed to configure handler for SIGTERM");
+        return (-1);
+    }
+    
     return (0);
 }
 
@@ -187,8 +217,7 @@ int httpc_run(void) {
         config->on_request("SERVER", "RUNNING", "Server loop started");
     }
     
-    printf("Servidor rodando em http://%s:%d\n", config->host, config->port);
-    printf("Pressione Ctrl+C para parar\n");
+    server_welcome_message(config->host, config->port);
     
     while (g_running) {
         sleep(1);
@@ -199,7 +228,7 @@ int httpc_run(void) {
     }
     
     httpc_cleanup();
-    printf("[INFO] Servidor finalizado com sucesso\n");
+    log_success("Server stopped successfully");
     
     return (0);
 }

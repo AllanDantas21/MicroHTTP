@@ -3,8 +3,7 @@
 
 int allocate_buffer(char **buffer, size_t size) {
     *buffer = malloc(size);
-    if (*buffer == NULL) {
-        perror("Failed to allocate memory for buffer");
+    if (handle_memory_error(*buffer, __func__, __LINE__) == NULL) {
         return 0;
     }
     return 1;
@@ -41,8 +40,8 @@ void *handle_client(void *arg) {
         return NULL;
     }
     
-    int bytes_received = recv(clientSocketFd, buffer, BUFFER_SIZE - 1, 0);
-    if (bytes_received <= 0) {
+    ssize_t bytes_received = recv(clientSocketFd, buffer, BUFFER_SIZE - 1, 0);
+    if (handle_io_error(bytes_received, "recv", __func__, __LINE__) < 0) {
         close(clientSocketFd);
         free(buffer);
         free(info);
@@ -68,7 +67,13 @@ void *handle_client(void *arg) {
     http_status status = get_response_status(response);
     log_http_request(method, path, client_ip, status);
     
-    send(clientSocketFd, response, strlen(response), 0);
+    ssize_t bytes_sent = send(clientSocketFd, response, strlen(response), 0);
+    if (handle_io_error(bytes_sent, "send", __func__, __LINE__) < 0) {
+        close(clientSocketFd);
+        free(buffer);
+        free(info);
+        return NULL;
+    }
     
     close(clientSocketFd);
     free(buffer);
@@ -82,8 +87,7 @@ void main_handler(int serverSocket) {
         socklen_t clientAddressLength = sizeof(clientAddress);
 
         int clientSocketFd = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
-        if (clientSocketFd < 0) {
-            log_error("Error accepting connection");
+        if (handle_accept_error(clientSocketFd, __func__, __LINE__) < 0) {
             continue;
         }
 

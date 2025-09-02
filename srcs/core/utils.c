@@ -1,4 +1,5 @@
 #include "../../includes/core/utils.h"
+#include "../../includes/error_handling.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -7,7 +8,7 @@ char* string_dup(const char* str) {
     
     size_t len = strlen(str);
     char* dup = malloc(len + 1);
-    if (!dup) return NULL;
+    if (handle_memory_error(dup, __func__, __LINE__) == NULL) return NULL;
     
     strcpy(dup, str);
     return dup;

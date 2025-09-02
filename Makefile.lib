@@ -26,9 +26,8 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/handlers/methods/post_handler.c \
 	$(SRCS_DIR)/handlers/methods/unsupported_handler.c \
 	$(SRCS_DIR)/handlers/threads/client_theads.c \
-	$(SRCS_DIR)/logger/main_logger.c \
-	$(SRCS_DIR)/logger/messages/http_logger.c \
-	$(SRCS_DIR)/logger/messages/welcome.c
+	$(SRCS_DIR)/logger/user_logger.c \
+	$(SRCS_DIR)/errors/error_handling.c
 
 HTTPC_OBJS = $(HTTPC_SOURCES:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
 
@@ -48,6 +47,7 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)/handlers/threads
 	mkdir -p $(OBJS_DIR)/logger
 	mkdir -p $(OBJS_DIR)/logger/messages
+	mkdir -p $(OBJS_DIR)/errors
 
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)

@@ -15,7 +15,9 @@ static char* normalize_route(const char* route) {
 
 static bool copy_node(Router* router, const char* method, const char* route, route_handler handler) {
 	RouteNode* node = malloc(sizeof(RouteNode));
-	if (!node) { return false; }
+	if (handle_memory_error(node, __func__, __LINE__) == NULL) { 
+		return false; 
+	}
 
 	strncpy(node->method, method, sizeof(node->method) - 1);
 	node->method[sizeof(node->method) - 1] = '\0';
