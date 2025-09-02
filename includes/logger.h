@@ -5,6 +5,7 @@
 
 void logger_message(logger_status status);
 void welcome_message(void);
+void server_welcome_message(const char* host, int port);
 void log_http_request(const char* method, const char* path, const char* client_ip, http_status status_code);
 void log_connection(const char* client_ip);
 void log_error(const char* error_msg);

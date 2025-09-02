@@ -58,12 +58,6 @@ int main(void) {
     httpc_add_route(&g_router, "GET", "status", handle_api_status);
     httpc_add_route(&g_router, "POST", "echo", handle_echo);
     
-    if (httpc_start() != 0) {
-        httpc_cleanup();
-        return 1;
-    }
-    
-    int result = httpc_run();
-    httpc_cleanup();
-    return result;
+    // httpc_start() agora gerencia todo o ciclo de vida automaticamente
+    return httpc_start();
 }

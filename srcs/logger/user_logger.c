@@ -14,6 +14,17 @@ void welcome_message(void) {
     printf("--------------------------------\n\n");
 }
 
+void server_welcome_message(const char* host, int port) {
+    time_t now = time(0);
+    char* time_str = ctime(&now);
+    time_str[strlen(time_str) - 1] = '\0';
+    
+    printf("[%s] INFO: Server running on http://%s:%d\n", time_str, host, port);
+    printf("[%s] INFO: Press Ctrl+C to stop\n", time_str);
+    syslog(LOG_INFO, "Server running on http://%s:%d", host, port);
+    syslog(LOG_INFO, "Press Ctrl+C to stop");
+}
+
 void log_http_request(const char* method, const char* path, const char* client_ip, http_status status_code) {
     time_t now = time(0);
     char* time_str = ctime(&now);

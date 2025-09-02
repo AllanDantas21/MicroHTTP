@@ -59,7 +59,7 @@ int httpc_configure(const httpc_config_t* config);
 int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler);
 
 /**
- * @brief Inicia o servidor HTTP
+ * @brief Inicia o servidor HTTP 
  * @return 0 em caso de sucesso, -1 em caso de erro
  */
 int httpc_start(void);

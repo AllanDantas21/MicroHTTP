@@ -121,9 +121,35 @@ int httpc_start(void) {
         return (-1);
     }
     
-    printf("HTTP.c server started on %s:%d\n", config->host, config->port);
+    if (httpc_setup_signals() != 0) {
+        if (config->on_error) {
+            config->on_error("Failed to setup signal handlers");
+        }
+        httpc_stop();
+        return (-1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "RUNNING", "Server loop started");
+    }
+    
+    server_welcome_message(config->host, config->port);
+    
+    while (g_running) {
+        sleep(1);
+    }
+    
+    if (config && config->on_request) {
+        config->on_request("SERVER", "STOPPED", "Server loop ended");
+    }
+    
+    httpc_stop();
+    log_success("Server stopped successfully");
+    
+    httpc_cleanup();
     return (0);
 }
+
 
 int httpc_stop(void) {
     if (!g_running) {
@@ -191,8 +217,7 @@ int httpc_run(void) {
         config->on_request("SERVER", "RUNNING", "Server loop started");
     }
     
-    printf("Servidor rodando em http://%s:%d\n", config->host, config->port);
-    printf("Pressione Ctrl+C para parar\n");
+    server_welcome_message(config->host, config->port);
     
     while (g_running) {
         sleep(1);
@@ -203,7 +228,7 @@ int httpc_run(void) {
     }
     
     httpc_cleanup();
-    printf("[INFO] Servidor finalizado com sucesso\n");
+    log_success("Server stopped successfully");
     
     return (0);
 }
