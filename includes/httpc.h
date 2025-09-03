@@ -27,12 +27,12 @@
 #include "handlers/methods.h"
 #include "router.h"
 #include "server/server.h"
+#include "json/json_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Instância global do router
 extern Router g_router;
 
 /**

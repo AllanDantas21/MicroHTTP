@@ -27,7 +27,9 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/handlers/methods/unsupported_handler.c \
 	$(SRCS_DIR)/handlers/threads/client_theads.c \
 	$(SRCS_DIR)/logger/user_logger.c \
-	$(SRCS_DIR)/errors/error_handling.c
+	$(SRCS_DIR)/errors/error_handling.c \
+	$(SRCS_DIR)/json/json_utils.c \
+	$(SRCS_DIR)/json/cJSON.c
 
 HTTPC_OBJS = $(HTTPC_SOURCES:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
 
@@ -48,6 +50,7 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)/logger
 	mkdir -p $(OBJS_DIR)/logger/messages
 	mkdir -p $(OBJS_DIR)/errors
+	mkdir -p $(OBJS_DIR)/json
 
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
