@@ -21,6 +21,7 @@ set(HTTPC_SOURCES
     srcs/handlers/methods/post_handler.c
     srcs/handlers/methods/unsupported_handler.c
     srcs/logger/logger.c
+    srcs/json/cJSON.c
 )
 
 add_library(httpc_static STATIC ${HTTPC_SOURCES})
