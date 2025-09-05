@@ -19,15 +19,15 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/api/response.c \
 	$(SRCS_DIR)/core/config.c \
 	$(SRCS_DIR)/core/utils.c \
-	$(SRCS_DIR)/server/server.c \
-	$(SRCS_DIR)/router/router.c \
-	$(SRCS_DIR)/handlers/handler.c \
-	$(SRCS_DIR)/handlers/methods/get_handler.c \
-	$(SRCS_DIR)/handlers/methods/post_handler.c \
-	$(SRCS_DIR)/handlers/methods/unsupported_handler.c \
-	$(SRCS_DIR)/handlers/threads/client_theads.c \
-	$(SRCS_DIR)/logger/user_logger.c \
-	$(SRCS_DIR)/errors/error_handling.c \
+	$(SRCS_DIR)/core/server/server.c \
+	$(SRCS_DIR)/core/router/router.c \
+	$(SRCS_DIR)/core/handlers/handler.c \
+	$(SRCS_DIR)/core/handlers/methods/get_handler.c \
+	$(SRCS_DIR)/core/handlers/methods/post_handler.c \
+	$(SRCS_DIR)/core/handlers/methods/unsupported_handler.c \
+	$(SRCS_DIR)/core/handlers/threads/client_theads.c \
+	$(SRCS_DIR)/core/logger/user_logger.c \
+	$(SRCS_DIR)/core/errors/error_handling.c \
 	$(SRCS_DIR)/json/json_utils.c \
 	$(SRCS_DIR)/json/cJSON.c
 
@@ -41,15 +41,15 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)
 	mkdir -p $(OBJS_DIR)/api
 	mkdir -p $(OBJS_DIR)/core
-	mkdir -p $(OBJS_DIR)/server
-	mkdir -p $(OBJS_DIR)/router
+	mkdir -p $(OBJS_DIR)/core/server
+	mkdir -p $(OBJS_DIR)/core/router
 	mkdir -p $(OBJS_DIR)/routes
-	mkdir -p $(OBJS_DIR)/handlers
-	mkdir -p $(OBJS_DIR)/handlers/methods
-	mkdir -p $(OBJS_DIR)/handlers/threads
-	mkdir -p $(OBJS_DIR)/logger
-	mkdir -p $(OBJS_DIR)/logger/messages
-	mkdir -p $(OBJS_DIR)/errors
+	mkdir -p $(OBJS_DIR)/core/handlers
+	mkdir -p $(OBJS_DIR)/core/handlers/methods
+	mkdir -p $(OBJS_DIR)/core/handlers/threads
+	mkdir -p $(OBJS_DIR)/core/logger
+	mkdir -p $(OBJS_DIR)/core/logger/messages
+	mkdir -p $(OBJS_DIR)/core/errors
 	mkdir -p $(OBJS_DIR)/json
 
 $(LIB_DIR):
@@ -87,7 +87,7 @@ clean-examples:
 
 clean-all: clean clean-examples
 
-test: examples
+test:
 	@echo "Executando testes básicos..."
 	@echo "Teste concluído!"
 

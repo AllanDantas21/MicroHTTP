@@ -6,21 +6,26 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BUILD_EXAMPLES "Build example applications" ON)
+option(BUILD_EXAMPLES "Build example applications" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 
 include_directories(${CMAKE_SOURCE_DIR}/includes)
 
 set(HTTPC_SOURCES
-    srcs/httpc_lib.c
-    srcs/server/server.c
-    srcs/router/router.c
-    srcs/routes/routes.c
-    srcs/handlers/handler.c
-    srcs/handlers/methods/get_handler.c
-    srcs/handlers/methods/post_handler.c
-    srcs/handlers/methods/unsupported_handler.c
-    srcs/logger/logger.c
+    srcs/api/httpc_lib.c
+    srcs/api/response.c
+    srcs/core/config.c
+    srcs/core/utils.c
+    srcs/core/server/server.c
+    srcs/core/router/router.c
+    srcs/core/handlers/handler.c
+    srcs/core/handlers/methods/get_handler.c
+    srcs/core/handlers/methods/post_handler.c
+    srcs/core/handlers/methods/unsupported_handler.c
+    srcs/core/handlers/threads/client_theads.c
+    srcs/core/logger/user_logger.c
+    srcs/core/errors/error_handling.c
+    srcs/json/json_utils.c
     srcs/json/cJSON.c
 )
 
@@ -41,8 +46,6 @@ endif()
 if(BUILD_EXAMPLES)
     add_executable(simple_example examples/simple_server.c)
     target_link_libraries(simple_example httpc_static)
-    
-    target_link_libraries(original_example httpc_static)
 endif()
 
 install(TARGETS httpc_static

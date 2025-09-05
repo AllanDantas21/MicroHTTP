@@ -1,9 +1,9 @@
-#include "../../includes/server/server.h"
-#include "../../includes/httpc.h"
-#include "../../includes/handlers/methods.h"
-#include "../../includes/core/config.h"
-#include "../../includes/error_handling.h"
-#include "../../includes/logger.h"
+#include "../../../includes/server/server.h"
+#include "../../../includes/httpc.h"
+#include "../../../includes/handlers/methods.h"
+#include "../../../includes/core/config.h"
+#include "../../../includes/error_handling.h"
+#include "../../../includes/logger.h"
 #include <signal.h>
 #include <unistd.h>
 #include <pthread.h>

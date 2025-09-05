@@ -1,6 +1,6 @@
-#include "../../includes/logger.h"
-#include "../../includes/structs/enums.h"
-#include "../../includes/constants/constants.h"
+#include "../../../includes/logger.h"
+#include "../../../includes/structs/enums.h"
+#include "../../../includes/constants/constants.h"
 #include <stdio.h>
 #include <time.h>
 #include <syslog.h>
