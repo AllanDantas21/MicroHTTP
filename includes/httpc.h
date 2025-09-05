@@ -1,6 +1,6 @@
 /**
  * @file httpc.h
- * @brief HTTP.c - Micro Framework HTTP
+ * @brief HTTP.c - Micro HTTP Framework
  * @version 1.0.0
  * @author Allan Dantas
  * 
@@ -36,106 +36,106 @@ extern "C" {
 extern Router g_router;
 
 /**
- * @brief Inicializa a biblioteca HTTP.c
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Initialize the HTTP.c library
+ * @return 0 on success, -1 on error
  */
 int httpc_init(void);
 
 /**
- * @brief Configura o servidor com as opções especificadas
- * @param config Configuração do servidor
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Configure the server with the specified options
+ * @param config Server configuration
+ * @return 0 on success, -1 on error
  */
 int httpc_configure(const httpc_config_t* config);
 
 /**
- * @brief Adiciona uma rota ao servidor
- * @param router Ponteiro para a instância do router
- * @param method Método HTTP (GET, POST, PUT, DELETE, etc.)
- * @param path Caminho da rota
- * @param handler Função que processa a requisição
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Add a route to the server
+ * @param router Pointer to the router instance
+ * @param method HTTP method (GET, POST, PUT, DELETE, etc.)
+ * @param path Route path
+ * @param handler Function that processes the request
+ * @return 0 on success, -1 on error
  */
 int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler);
 
 /**
- * @brief Inicia o servidor HTTP 
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Start the HTTP server
+ * @return 0 on success, -1 on error
  */
 int httpc_start(void);
 
 /**
- * @brief Para o servidor HTTP
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Stop the HTTP server
+ * @return 0 on success, -1 on error
  */
 int httpc_stop(void);
 
 /**
- * @brief Executa o servidor em loop até receber sinal de parada
- * @return 0 em caso de sucesso, -1 em caso de erro
+ * @brief Run the server loop until a stop signal is received
+ * @return 0 on success, -1 on error
  */
 int httpc_run(void);
 
 /**
- * @brief Limpa recursos da biblioteca
+ * @brief Clean up library resources
  */
 void httpc_cleanup(void);
 
 /**
- * @brief Cria uma resposta HTTP
- * @param status_code Código de status HTTP
- * @param content_type Tipo de conteúdo
- * @param body Corpo da resposta
- * @return Estrutura de resposta HTTP
+ * @brief Create an HTTP response
+ * @param status_code HTTP status code
+ * @param content_type Content type
+ * @param body Response body
+ * @return HTTP response structure
  */
 httpc_response_t* httpc_create_response(int status_code, const char* content_type, const char* body);
 
 /**
- * @brief Libera uma resposta HTTP
- * @param response Resposta a ser liberada
+ * @brief Free an HTTP response
+ * @param response Response to be freed
  */
 void httpc_free_response(httpc_response_t* response);
 
 /**
- * @brief Converte uma resposta HTTP para string
- * @param response Resposta HTTP
- * @return String formatada da resposta
+ * @brief Convert an HTTP response to a string
+ * @param response HTTP response
+ * @return Formatted response string
  */
 char* httpc_response_to_string(const httpc_response_t* response);
 
 /**
- * @brief Define um header personalizado na resposta
- * @param response Resposta HTTP
- * @param key Chave do header
- * @param value Valor do header
+ * @brief Set a custom header in the response
+ * @param response HTTP response
+ * @param key Header key
+ * @param value Header value
  */
 void httpc_set_header(httpc_response_t* response, const char* key, const char* value);
 
 /**
- * @brief Constrói apenas os headers HTTP para uma resposta
+ * @brief Build only the HTTP headers for a response
  */
 char* httpc_build_headers(int status_code, const char* content_type, size_t content_length, const char* extra_headers);
 
 /**
- * @brief Constrói resposta completa (headers + body)
+ * @brief Build the full response (headers + body)
  */
 char* build_response(int status_code, const char* content_type, const char* body);
 
 /**
- * @brief Verifica se o servidor está rodando
- * @return 1 se estiver rodando, 0 caso contrário
+ * @brief Check if the server is running
+ * @return 1 if running, 0 otherwise
  */
 int httpc_is_running(void);
 
 /**
- * @brief Obtém a configuração atual do servidor
- * @return Ponteiro para a configuração atual
+ * @brief Get the current server configuration
+ * @return Pointer to the current configuration
  */
 const httpc_config_t* httpc_get_config(void);
 
 /**
- * @brief Obtém o socket do servidor
- * @return Descritor do socket ou -1 se não estiver ativo
+ * @brief Get the server socket
+ * @return Socket descriptor or -1 if not active
  */
 int httpc_get_server_socket(void);
 
