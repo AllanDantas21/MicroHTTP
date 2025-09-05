@@ -3,13 +3,11 @@
 
 #include "../http.h"
 
-// Funções básicas do servidor
 int setup_server_address(struct sockaddr_in *serverAddress, int port);
 int create_server_socket(void);
 int bind_server_socket(int serverSocket, struct sockaddr_in *serverAddress);
 int start_listening(int serverSocket, int backlog);
 
-// Funções de controle do servidor HTTP
 int httpc_start(void);
 int httpc_stop(void);
 int httpc_is_running(void);

@@ -5,12 +5,16 @@
 
 char* handle_home(const char* buffer) {
     (void)buffer;
-    return "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 89\r\n\r\n<html><body><h1>Bem-vindo ao HTTP.c!</h1><p>Um micro framework HTTP em C</p></body></html>";
+    const char* body = "<html><body><h1>Bem-vindo ao HTTP.c!</h1><p>Um micro framework HTTP em C</p></body></html>";
+    char* response = build_response(200, "text/html", body);
+    return response;
 }
 
 char* handle_api_status(const char* buffer) {
     (void)buffer;
-    return "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 25\r\n\r\n{\"status\": \"running\"}";
+    const char* body = "{\"status\": \"running\"}";
+    char* response = build_response(200, "application/json", body);
+    return response;
 }
 
 char* handle_json_echo(const char* buffer) {

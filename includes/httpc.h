@@ -112,6 +112,16 @@ char* httpc_response_to_string(const httpc_response_t* response);
 void httpc_set_header(httpc_response_t* response, const char* key, const char* value);
 
 /**
+ * @brief Constrói apenas os headers HTTP para uma resposta
+ */
+char* httpc_build_headers(int status_code, const char* content_type, size_t content_length, const char* extra_headers);
+
+/**
+ * @brief Constrói resposta completa (headers + body)
+ */
+char* build_response(int status_code, const char* content_type, const char* body);
+
+/**
  * @brief Verifica se o servidor está rodando
  * @return 1 se estiver rodando, 0 caso contrário
  */

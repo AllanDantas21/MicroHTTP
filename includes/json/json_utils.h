@@ -31,4 +31,4 @@ void httpc_json_free(cJSON* json);
 }
 #endif
 
-#endif // JSON_UTILS_H
+#endif
