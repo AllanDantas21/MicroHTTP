@@ -1,8 +1,8 @@
-#include "../../includes/httpc.h"
+#include "../../includes/api/httpc.h"
 #include "../../includes/core/config.h"
-#include "../../includes/router.h"
-#include "../../includes/server/server.h"
-#include "../../includes/logger.h"
+#include "../../includes/core/router.h"
+#include "../../includes/core/server.h"
+#include "../../includes/core/logger.h"
 #include <stdio.h>
 
 Router g_router = {0};

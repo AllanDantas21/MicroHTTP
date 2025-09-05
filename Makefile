@@ -1,26 +1,22 @@
-NAME = webserv
+NAME = httpc
 
-CC = cc
-CFLAGS = -Wall -Wextra -Werror -I includes/
+.PHONY: all lib clean fclean re install help
 
-SRCS_DIR = srcs/
-SRCS = $(shell find $(SRCS_DIR) -name '*.c')
-OBJS = $(SRCS:.c=.o)
+all: lib
 
-all: $(NAME)
-
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+lib:
+	$(MAKE) -f Makefile.lib all
 
 clean:
-	rm -f $(OBJS)
+	$(MAKE) -f Makefile.lib clean
 
-fclean: clean
-	rm -f $(NAME)
+fclean:
+	$(MAKE) -f Makefile.lib clean-all
 
 re: fclean all
 
-.PHONY: all clean fclean re
+install:
+	$(MAKE) -f Makefile.lib install
+
+help:
+	$(MAKE) -f Makefile.lib help

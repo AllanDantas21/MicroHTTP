@@ -14,10 +14,10 @@
 
 #include "constants/constants.h"
 #include "structs/enums.h"
-#include "handlers/methods.h"
-#include "router.h"
-#include "logger.h"
-#include "error_handling.h"
+#include "core/methods.h"
+#include "core/router.h"
+#include "core/logger.h"
+#include "core/error_handling.h"
 
 void main_handler(int serverSocket);
 void create_client_thread(client_info *info);

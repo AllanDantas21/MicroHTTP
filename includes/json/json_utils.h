@@ -1,7 +1,7 @@
 #ifndef JSON_UTILS_H
 #define JSON_UTILS_H
 
-#include "../httpc.h"
+#include "api/httpc.h"
 #include "../structs/httpc.h"
 #include "../../srcs/json/cJSON.h"
 #include <stddef.h>
@@ -31,4 +31,4 @@ void httpc_json_free(cJSON* json);
 }
 #endif
 
-#endif // JSON_UTILS_H
+#endif
