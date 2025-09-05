@@ -14,7 +14,7 @@
 
 #include "constants/constants.h"
 #include "structs/enums.h"
-#include "core/handlers/methods.h"
+#include "core/methods.h"
 #include "core/router.h"
 #include "core/logger.h"
 #include "core/error_handling.h"

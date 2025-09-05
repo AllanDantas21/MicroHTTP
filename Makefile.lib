@@ -19,15 +19,15 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/api/response.c \
 	$(SRCS_DIR)/core/config.c \
 	$(SRCS_DIR)/core/utils.c \
-	$(SRCS_DIR)/core/server/server.c \
-	$(SRCS_DIR)/core/router/router.c \
+	$(SRCS_DIR)/core/server.c \
+	$(SRCS_DIR)/core/router.c \
 	$(SRCS_DIR)/core/handlers/handler.c \
 	$(SRCS_DIR)/core/handlers/methods/get_handler.c \
 	$(SRCS_DIR)/core/handlers/methods/post_handler.c \
 	$(SRCS_DIR)/core/handlers/methods/unsupported_handler.c \
 	$(SRCS_DIR)/core/handlers/threads/client_theads.c \
-	$(SRCS_DIR)/core/logger/user_logger.c \
-	$(SRCS_DIR)/core/errors/error_handling.c \
+	$(SRCS_DIR)/core/user_logger.c \
+	$(SRCS_DIR)/core/error_handling.c \
 	$(SRCS_DIR)/json/json_utils.c \
 	$(SRCS_DIR)/json/cJSON.c
 

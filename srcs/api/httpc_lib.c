@@ -1,7 +1,7 @@
 #include "../../includes/api/httpc.h"
 #include "../../includes/core/config.h"
 #include "../../includes/core/router.h"
-#include "../../includes/core/server/server.h"
+#include "../../includes/core/server.h"
 #include "../../includes/core/logger.h"
 #include <stdio.h>
 

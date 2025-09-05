@@ -1,5 +1,5 @@
 #include "api/http.h"
-#include "core/handlers/methods.h"
+#include "core/methods.h"
 #include "core/router.h"
 #include "api/httpc.h"
 
