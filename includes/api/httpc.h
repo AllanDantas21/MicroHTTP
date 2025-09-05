@@ -24,9 +24,9 @@
 #include "constants/macros.h"
 #include "structs/enums.h"
 #include "structs/httpc.h"
-#include "handlers/methods.h"
-#include "router.h"
-#include "server/server.h"
+#include "core/handlers/methods.h"
+#include "core/router.h"
+#include "core/server/server.h"
 #include "json/json_utils.h"
 
 #ifdef __cplusplus

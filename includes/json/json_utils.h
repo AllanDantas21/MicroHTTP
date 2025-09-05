@@ -1,7 +1,7 @@
 #ifndef JSON_UTILS_H
 #define JSON_UTILS_H
 
-#include "../httpc.h"
+#include "api/httpc.h"
 #include "../structs/httpc.h"
 #include "../../srcs/json/cJSON.h"
 #include <stddef.h>

@@ -1,5 +1,5 @@
-#include "../includes/httpc.h"
-#include "../includes/http.h"
+#include "../includes/api/httpc.h"
+#include "../includes/api/http.h"
 #include "../includes/json/json_utils.h"
 #include <stdio.h>
 

@@ -1,7 +1,7 @@
 #include "../../includes/core/config.h"
-#include "../../includes/httpc.h"
+#include "../../includes/api/httpc.h"
 #include "../../includes/constants/constants.h"
-#include "../../includes/logger.h"
+#include "../../includes/core/logger.h"
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>

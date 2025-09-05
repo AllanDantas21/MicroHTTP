@@ -1,7 +1,7 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
-#include "../httpc.h"
+#include "api/httpc.h"
 
 httpc_response_t* httpc_create_response(int status_code, const char* content_type, const char* body);
 void httpc_free_response(httpc_response_t* response);

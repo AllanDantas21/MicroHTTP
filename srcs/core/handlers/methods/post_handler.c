@@ -1,7 +1,7 @@
-#include "http.h"
-#include "handlers/methods.h"
-#include "router.h"
-#include "httpc.h"
+#include "api/http.h"
+#include "core/handlers/methods.h"
+#include "core/router.h"
+#include "api/httpc.h"
 
 char* handle_post_request(const char* buffer) {
 	static char response_buffer[BUFFER_SIZE];

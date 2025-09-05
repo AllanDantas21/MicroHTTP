@@ -1,5 +1,5 @@
 #include "../../includes/core/utils.h"
-#include "../../includes/error_handling.h"
+#include "../../includes/core/error_handling.h"
 #include <string.h>
 #include <stdlib.h>
 

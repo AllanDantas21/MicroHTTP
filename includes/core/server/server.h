@@ -1,7 +1,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "../http.h"
+#include "api/http.h"
 
 int setup_server_address(struct sockaddr_in *serverAddress, int port);
 int create_server_socket(void);

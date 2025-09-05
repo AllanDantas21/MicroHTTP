@@ -1,5 +1,5 @@
-#include "http.h"
-#include "handlers/methods.h"
+#include "api/http.h"
+#include "core/handlers/methods.h"
 
 char* handle_unsupported_method(const char* method) {
     (void)method;
