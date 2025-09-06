@@ -10,7 +10,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
-#include <pthread.h>
 
 #include "constants/constants.h"
 #include "structs/enums.h"
@@ -20,7 +19,5 @@
 #include "core/error_handling.h"
 
 void main_handler(int serverSocket);
-void create_client_thread(client_info *info);
-void *handle_client(void *arg);
 
 #endif

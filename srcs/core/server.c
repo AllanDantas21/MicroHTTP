@@ -6,13 +6,11 @@
 #include "../../includes/core/logger.h"
 #include <signal.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <errno.h>
 #include <stdio.h>
 
 static int g_server_socket = -1;
 static int g_running = 0;
-static pthread_t g_main_thread = {0};
 
 int setup_server_address(struct sockaddr_in *serverAddress, int port)
 {
@@ -68,12 +66,10 @@ static void signal_handler(int sig) {
 
 static void* server_main_loop(void* arg) {
     (void)arg;
-    
     const httpc_config_t* config = httpc_get_config();
     if (config && config->on_request) {
         config->on_request("SERVER", "STARTED", "Server is running");
     }
-    
     main_handler(g_server_socket);
     return (NULL);
 }
@@ -112,15 +108,7 @@ int httpc_start(void) {
     }
     
     g_running = 1;
-    
-    int thread_result = pthread_create(&g_main_thread, NULL, server_main_loop, NULL);
-    if (handle_thread_error(thread_result, __func__, __LINE__) < 0) {
-        close(g_server_socket);
-        g_server_socket = -1;
-        g_running = 0;
-        return (-1);
-    }
-    
+
     if (httpc_setup_signals() != 0) {
         if (config->on_error) {
             config->on_error("Failed to setup signal handlers");
@@ -135,9 +123,7 @@ int httpc_start(void) {
     
     server_welcome_message(config->host, config->port);
     
-    while (g_running) {
-        sleep(1);
-    }
+    server_main_loop(NULL);
     
     if (config && config->on_request) {
         config->on_request("SERVER", "STOPPED", "Server loop ended");
@@ -145,7 +131,7 @@ int httpc_start(void) {
     
     httpc_stop();
     log_success("Server stopped successfully");
-    
+
     httpc_cleanup();
     return (0);
 }
@@ -163,10 +149,6 @@ int httpc_stop(void) {
         g_server_socket = -1;
     }
     
-    if (g_main_thread) {
-        pthread_join(g_main_thread, NULL);
-        memset(&g_main_thread, 0, sizeof(pthread_t));
-    }
     
     printf("HTTP.c server stopped\n");
     return (0);
