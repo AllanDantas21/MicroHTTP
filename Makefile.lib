@@ -25,7 +25,6 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/core/handlers/methods/get_handler.c \
 	$(SRCS_DIR)/core/handlers/methods/post_handler.c \
 	$(SRCS_DIR)/core/handlers/methods/unsupported_handler.c \
-	$(SRCS_DIR)/core/handlers/threads/client_theads.c \
 	$(SRCS_DIR)/core/user_logger.c \
 	$(SRCS_DIR)/core/error_handling.c \
 	$(SRCS_DIR)/json/json_utils.c \
@@ -46,7 +45,6 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)/routes
 	mkdir -p $(OBJS_DIR)/core/handlers
 	mkdir -p $(OBJS_DIR)/core/handlers/methods
-	mkdir -p $(OBJS_DIR)/core/handlers/threads
 	mkdir -p $(OBJS_DIR)/core/logger
 	mkdir -p $(OBJS_DIR)/core/logger/messages
 	mkdir -p $(OBJS_DIR)/core/errors
@@ -60,7 +58,7 @@ $(LIB_DIR)/$(LIB_NAME).a: $(HTTPC_OBJS) | $(LIB_DIR)
 	$(RANLIB) $@
 
 $(LIB_DIR)/$(LIB_NAME).so: $(HTTPC_OBJS) | $(LIB_DIR)
-	$(CC) -shared -o $@ $^ -lpthread
+	$(CC) -shared -o $@ $^
 
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
 	@mkdir -p $(dir $@)
@@ -69,7 +67,7 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
 examples: $(EXAMPLES)
 
 examples/simple_server: examples/simple_server.c $(LIB_DIR)/$(LIB_NAME).a
-	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -lpthread -Wl,-rpath,$(shell pwd)/$(LIB_DIR)
+	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -Wl,-rpath,$(shell pwd)/$(LIB_DIR)
 
 install: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so
 	install -d $(DESTDIR)/usr/local/lib
