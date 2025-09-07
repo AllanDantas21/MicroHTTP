@@ -1,6 +1,5 @@
 #include "../../includes/core/server.h"
 #include "../../includes/api/httpc.h"
-#include "../../includes/core/methods.h"
 #include "../../includes/core/config.h"
 #include "../../includes/core/error_handling.h"
 #include "../../includes/core/logger.h"

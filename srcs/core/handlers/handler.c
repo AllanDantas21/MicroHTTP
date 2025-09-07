@@ -1,4 +1,5 @@
 #include "api/http.h"
+#include "api/httpc.h"
 #include <arpa/inet.h>
 #include "core/server.h"
 #include "structs/connection.h"
@@ -12,16 +13,6 @@ int allocate_buffer(char **buffer, size_t size) {
         return 0;
     }
     return 1;
-}
-
-static char* extract_path_from_request(const char* buffer) {
-    static char path[256];
-    char method[16];
-    
-    if (sscanf(buffer, "%15s %255s", method, path) == 2) {
-        return path;
-    }
-    return "/";
 }
 
 static http_status get_response_status(const char* response) {
@@ -202,21 +193,25 @@ void main_handler(int serverSocket) {
 						conn->buffer[conn->buffer_len] = '\0';
 						if (headers_complete(conn->buffer, conn->buffer_len)) {
 							char method[16] = {0};
-							sscanf(conn->buffer, "%15s", method);
-							char *response;
-							if (strcmp(method, "GET") == 0) {
-								response = handle_get_request(conn->buffer);
-							} else if (strcmp(method, "POST") == 0) {
-								response = handle_post_request(conn->buffer);
+							char path[256] = {0};
+							char *response = NULL;
+
+							if (sscanf(conn->buffer, "%15s %255s", method, path) != 2) {
+								response = build_response(400, "text/plain", "Bad Request");
 							} else {
-								response = handle_unsupported_method(method);
+								const char *route = (path[0] == '/') ? path + 1 : path;
+								route_handler h = router_match(&g_router, method, route);
+								if (h) {
+									response = h(conn->buffer);
+								} else {
+									response = build_response(404, "text/plain", "Not Found");
+								}
 							}
 							conn->response = response;
 							conn->response_len = strlen(response);
 							conn->response_sent = 0;
 
 							http_status status = get_response_status(response);
-							char *path = extract_path_from_request(conn->buffer);
 							log_http_request(method, path, conn->client_ip, status);
 
 							conn->state = CONNECTION_STATE_SEND;

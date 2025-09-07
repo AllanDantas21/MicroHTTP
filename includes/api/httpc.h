@@ -24,7 +24,6 @@
 #include "constants/macros.h"
 #include "structs/enums.h"
 #include "structs/httpc.h"
-#include "core/methods.h"
 #include "core/router.h"
 #include "core/server.h"
 #include "json/json_utils.h"
