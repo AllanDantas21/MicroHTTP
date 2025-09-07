@@ -22,9 +22,6 @@ HTTPC_SOURCES = \
 	$(SRCS_DIR)/core/server.c \
 	$(SRCS_DIR)/core/router.c \
 	$(SRCS_DIR)/core/handlers/handler.c \
-	$(SRCS_DIR)/core/handlers/methods/get_handler.c \
-	$(SRCS_DIR)/core/handlers/methods/post_handler.c \
-	$(SRCS_DIR)/core/handlers/methods/unsupported_handler.c \
 	$(SRCS_DIR)/core/user_logger.c \
 	$(SRCS_DIR)/core/error_handling.c \
 	$(SRCS_DIR)/json/json_utils.c \
@@ -44,7 +41,6 @@ $(OBJS_DIR):
 	mkdir -p $(OBJS_DIR)/core/router
 	mkdir -p $(OBJS_DIR)/routes
 	mkdir -p $(OBJS_DIR)/core/handlers
-	mkdir -p $(OBJS_DIR)/core/handlers/methods
 	mkdir -p $(OBJS_DIR)/core/logger
 	mkdir -p $(OBJS_DIR)/core/logger/messages
 	mkdir -p $(OBJS_DIR)/core/errors

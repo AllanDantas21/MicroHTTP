@@ -24,7 +24,6 @@
 #include "constants/macros.h"
 #include "structs/enums.h"
 #include "structs/httpc.h"
-#include "core/methods.h"
 #include "core/router.h"
 #include "core/server.h"
 #include "json/json_utils.h"
@@ -138,6 +137,11 @@ const httpc_config_t* httpc_get_config(void);
  * @return Socket descriptor or -1 if not active
  */
 int httpc_get_server_socket(void);
+
+/**
+ * @brief Main event loop handler. Blocks and handles connections/events.
+ */
+void main_handler(int serverSocket);
 
 
 
