@@ -27,7 +27,6 @@ To create an HTTP server, you need to include the necessary headers and configur
 
 ```c
 #include "includes/api/httpc.h"
-#include "includes/api/http.h"
 
 int main(void) {
     // Initialize the framework

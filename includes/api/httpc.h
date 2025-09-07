@@ -138,6 +138,11 @@ const httpc_config_t* httpc_get_config(void);
  */
 int httpc_get_server_socket(void);
 
+/**
+ * @brief Main event loop handler. Blocks and handles connections/events.
+ */
+void main_handler(int serverSocket);
+
 
 
 #ifdef __cplusplus

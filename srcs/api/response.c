@@ -1,6 +1,6 @@
 #include "../../includes/api/response.h"
 #include "../../includes/core/utils.h"
-#include "../../includes/api/http.h"
+#include "../../includes/core/error_handling.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

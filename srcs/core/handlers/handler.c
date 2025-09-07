@@ -1,5 +1,6 @@
-#include "api/http.h"
 #include "api/httpc.h"
+#include "core/error_handling.h"
+#include "core/logger.h"
 #include <arpa/inet.h>
 #include "core/server.h"
 #include "structs/connection.h"
