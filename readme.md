@@ -38,8 +38,7 @@ int main(void) {
     httpc_config_t config = {
         .port = 8080,
         .backlog = 10,
-        .max_clients = 10,
-        .host = "127.0.0.1"
+        .max_clients = 10
     };
     
     if (httpc_configure(&config) != 0) {

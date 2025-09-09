@@ -5,7 +5,6 @@ typedef struct {
     int port;
     int backlog;
     int max_clients;
-    char* host;
     void (*on_request)(const char* method, const char* path, const char* body);
     void (*on_error)(const char* error);
 } httpc_config_t;

@@ -15,7 +15,7 @@ int setup_server_address(struct sockaddr_in *serverAddress, int port)
 {
     serverAddress->sin_family = AF_INET;
     serverAddress->sin_port = htons(port);
-    serverAddress->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    serverAddress->sin_addr.s_addr = htonl(INADDR_ANY);
     return (0);
 }
 
@@ -120,7 +120,7 @@ int httpc_start(void) {
         config->on_request("SERVER", "RUNNING", "Server loop started");
     }
     
-    server_welcome_message(config->host, config->port);
+    server_welcome_message(config->port);
     
     server_main_loop(NULL);
     
@@ -198,7 +198,7 @@ int httpc_run(void) {
         config->on_request("SERVER", "RUNNING", "Server loop started");
     }
     
-    server_welcome_message(config->host, config->port);
+    server_welcome_message(config->port);
     
     while (g_running) {
         sleep(1);

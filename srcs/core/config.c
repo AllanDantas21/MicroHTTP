@@ -28,7 +28,6 @@ static int validate_config(const httpc_config_t* config) {
     if (config->port <= 0 || config->port > 65535) return (-1);
     if (config->backlog <= 0) return (-1);
     if (config->max_clients <= 0) return (-1);
-    if (!config->host) return (-1);
     
     return (0);
 }
@@ -44,10 +43,6 @@ static void apply_default_config(httpc_config_t* config) {
     
     if (config->max_clients <= 0) {
         config->max_clients = MAX_CLIENTS;
-    }
-
-    if (!config->host) {
-        config->host = DEFAULT_HOST;
     }
 }
 
@@ -76,7 +71,6 @@ void httpc_init_default_config(void) {
     g_config.port = PORT;
     g_config.backlog = BACKLOG;
     g_config.max_clients = MAX_CLIENTS;
-    g_config.host = DEFAULT_HOST;
     g_config.on_request = default_on_request;
     g_config.on_error = default_on_error;
 }
