@@ -82,8 +82,7 @@ clean-examples:
 clean-all: clean clean-examples
 
 test:
-	@echo "Executando testes básicos..."
-	@echo "Teste concluído!"
+	@echo "Use 'make test' no diretório raiz para executar os testes completos"
 
 help:
 	@echo "HTTP.c Library Makefile"
