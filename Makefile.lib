@@ -17,10 +17,12 @@ INCLUDE_DIR = includes
 HTTPC_SOURCES = \
 	$(SRCS_DIR)/api/httpc_lib.c \
 	$(SRCS_DIR)/api/response.c \
+	$(SRCS_DIR)/api/response_helpers.c \
 	$(SRCS_DIR)/core/config.c \
 	$(SRCS_DIR)/core/utils.c \
 	$(SRCS_DIR)/core/server.c \
 	$(SRCS_DIR)/core/router.c \
+	$(SRCS_DIR)/core/request_parser.c \
 	$(SRCS_DIR)/core/handlers/handler.c \
 	$(SRCS_DIR)/core/user_logger.c \
 	$(SRCS_DIR)/core/error_handling.c \

@@ -16,12 +16,15 @@ typedef struct {
     char* headers;
 } httpc_response_t;
 
+typedef struct HttpHeader HttpHeader;
+
 typedef struct {
     char* method;
     char* path;
     char* body;
     char* headers;
     char* query_string;
+    HttpHeader* parsed_headers;
 } httpc_request_t;
 
 #endif

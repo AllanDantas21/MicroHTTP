@@ -1,7 +1,9 @@
 #ifndef ROUTE_H
 #define ROUTE_H
 
-typedef char* (*route_handler)(const char* buffer);
+#include "httpc.h"
+
+typedef httpc_response_t* (*route_handler)(httpc_request_t* req);
 
 typedef struct RouteNode {
 	char method[8];
