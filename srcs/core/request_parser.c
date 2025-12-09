@@ -27,6 +27,42 @@ static void strtolower(char* str) {
     }
 }
 
+static int hex_to_int(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    return -1;
+}
+
+static char* url_decode(const char* str) {
+    if (!str) return NULL;
+    
+    size_t len = strlen(str);
+    char* decoded = malloc(len + 1);
+    if (!decoded) return NULL;
+    
+    size_t j = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (str[i] == '%' && i + 2 < len) {
+            int high = hex_to_int(str[i + 1]);
+            int low = hex_to_int(str[i + 2]);
+            if (high >= 0 && low >= 0) {
+                decoded[j++] = (char)((high << 4) | low);
+                i += 2;
+                continue;
+            }
+        }
+        if (str[i] == '+') {
+            decoded[j++] = ' ';
+            continue;
+        }
+        decoded[j++] = str[i];
+    }
+    decoded[j] = '\0';
+    
+    return decoded;
+}
+
 static void add_header(httpc_request_t* req, const char* name, const char* value) {
     if (!req || !name || !value) return;
     
@@ -45,6 +81,68 @@ static void add_header(httpc_request_t* req, const char* name, const char* value
         free(header->value);
         free(header);
     }
+}
+
+static void add_query_param(httpc_request_t* req, const char* name, const char* value) {
+    if (!req || !name) return;
+    
+    QueryParam* param = malloc(sizeof(QueryParam));
+    if (handle_memory_error(param, __func__, __LINE__) == NULL) {
+        return;
+    }
+    
+    param->name = string_dup(name);
+    param->value = value ? string_dup(value) : string_dup("");
+    param->next = req->parsed_query_params;
+    req->parsed_query_params = param;
+    
+    if (!param->name || !param->value) {
+        free(param->name);
+        free(param->value);
+        free(param);
+    }
+}
+
+static void parse_query_string(httpc_request_t* req) {
+    if (!req || !req->query_string) return;
+    
+    char* query_copy = string_dup(req->query_string);
+    if (!query_copy) return;
+    
+    char* pair = query_copy;
+    
+    while (*pair != '\0') {
+        char* next_pair = strchr(pair, '&');
+        if (next_pair) {
+            *next_pair = '\0';
+        }
+        
+        char* equals = strchr(pair, '=');
+        if (equals) {
+            *equals = '\0';
+            char* name = trim_whitespace(pair);
+            char* value = trim_whitespace(equals + 1);
+            
+            if (name && strlen(name) > 0) {
+                char* decoded_value = value ? url_decode(value) : NULL;
+                add_query_param(req, name, decoded_value ? decoded_value : "");
+                if (decoded_value) free(decoded_value);
+            }
+        } else {
+            char* name = trim_whitespace(pair);
+            if (name && strlen(name) > 0) {
+                add_query_param(req, name, "");
+            }
+        }
+        
+        if (next_pair) {
+            pair = next_pair + 1;
+        } else {
+            break;
+        }
+    }
+    
+    free(query_copy);
 }
 
 static void parse_headers(httpc_request_t* req, const char* headers_start) {
@@ -127,6 +225,10 @@ int httpc_parse_request(const char* buffer, httpc_request_t* req) {
         return -1;
     }
     
+    if (req->query_string) {
+        parse_query_string(req);
+    }
+    
     const char* headers_start = strstr(buffer, "\r\n");
     if (headers_start) {
         headers_start += 2;
@@ -180,7 +282,27 @@ void httpc_free_request(httpc_request_t* req) {
         header = next;
     }
     
+    QueryParam* qparam = req->parsed_query_params;
+    while (qparam) {
+        QueryParam* next = qparam->next;
+        free(qparam->name);
+        free(qparam->value);
+        free(qparam);
+        qparam = next;
+    }
+    
+    PathParam* pparam = req->path_params;
+    while (pparam) {
+        PathParam* next = pparam->next;
+        free(pparam->name);
+        free(pparam->value);
+        free(pparam);
+        pparam = next;
+    }
+    
     req->parsed_headers = NULL;
+    req->parsed_query_params = NULL;
+    req->path_params = NULL;
     memset(req, 0, sizeof(httpc_request_t));
 }
 
@@ -203,5 +325,52 @@ const char* httpc_get_header_value(httpc_request_t* req, const char* name) {
     
     free(name_lower);
     return NULL;
+}
+
+const char* httpc_get_header(httpc_request_t* req, const char* name) {
+    return httpc_get_header_value(req, name);
+}
+
+const char* httpc_get_query_param(httpc_request_t* req, const char* name) {
+    if (!req || !name) return NULL;
+    
+    QueryParam* param = req->parsed_query_params;
+    while (param) {
+        if (param->name && strcmp(param->name, name) == 0) {
+            return param->value;
+        }
+        param = param->next;
+    }
+    
+    return NULL;
+}
+
+const char* httpc_get_path_param(httpc_request_t* req, const char* name) {
+    if (!req || !name) return NULL;
+    
+    PathParam* param = req->path_params;
+    while (param) {
+        if (param->name && strcmp(param->name, name) == 0) {
+            return param->value;
+        }
+        param = param->next;
+    }
+    
+    return NULL;
+}
+
+const char* httpc_get_body(httpc_request_t* req) {
+    if (!req) return NULL;
+    return req->body;
+}
+
+const char* httpc_get_method(httpc_request_t* req) {
+    if (!req) return NULL;
+    return req->method;
+}
+
+const char* httpc_get_path(httpc_request_t* req) {
+    if (!req) return NULL;
+    return req->path;
 }
 
