@@ -95,6 +95,7 @@ void logger_message(logger_status status) {
 }
 
 int init_logger_system(void) {
+    errno = 0;
     openlog("MicroHTTP", LOG_PID | LOG_CONS, LOG_USER);
     
     if (errno != 0) {

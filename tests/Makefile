@@ -8,8 +8,8 @@ TEST_EXEC = test_httpc
 
 all: $(TEST_EXEC)
 
-$(TEST_EXEC): $(TEST_OBJ) ../lib/libhttpc.a
-	$(CC) $(CFLAGS) -o $@ $< -L../lib -lhttpc -lm
+$(TEST_EXEC): $(TEST_OBJ) ../lib/libhttpc.so
+	$(CC) $(CFLAGS) -o $@ $< -L../lib -lhttpc -lm -Wl,-rpath,$(shell cd .. && pwd)/lib
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

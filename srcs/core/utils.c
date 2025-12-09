@@ -10,7 +10,7 @@ char* string_dup(const char* str) {
     char* dup = malloc(len + 1);
     if (handle_memory_error(dup, __func__, __LINE__) == NULL) return NULL;
     
-    strcpy(dup, str);
+    memcpy(dup, str, len + 1);
     return dup;
 }
 

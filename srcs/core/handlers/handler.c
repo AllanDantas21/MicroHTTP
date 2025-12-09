@@ -3,6 +3,7 @@
 #include "core/logger.h"
 #include "core/request_parser.h"
 #include "api/response.h"
+#include "constants/constants.h"
 #include <arpa/inet.h>
 #include "core/server.h"
 #include "structs/connection.h"
@@ -195,6 +196,12 @@ void main_handler(int serverSocket) {
 					if (bytes > 0) {
 						conn->buffer_len += (size_t)bytes;
 						conn->buffer[conn->buffer_len] = '\0';
+						
+						if (conn->buffer_len > MAX_HEADER_SIZE + MAX_BODY_SIZE) {
+							remove_connection(epoll_fd, conn);
+							break;
+						}
+						
 						if (headers_complete(conn->buffer, conn->buffer_len)) {
 							char method[16] = {0};
 							char path[256] = {0};
@@ -248,8 +255,12 @@ void main_handler(int serverSocket) {
 							httpc_free_request(req);
 							free(req);
 
+							if (!response) {
+								response = build_response(500, "text/plain", "Internal Server Error");
+							}
+							
 							conn->response = response;
-							conn->response_len = response ? strlen(response) : 0;
+							conn->response_len = strlen(response);
 							conn->response_sent = 0;
 
 							http_status status = get_response_status(response);

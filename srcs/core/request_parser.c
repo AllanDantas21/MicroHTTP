@@ -1,6 +1,7 @@
 #include "../../includes/core/request_parser.h"
 #include "../../includes/core/utils.h"
 #include "../../includes/core/error_handling.h"
+#include "../../includes/constants/constants.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -72,15 +73,20 @@ static void add_header(httpc_request_t* req, const char* name, const char* value
     }
     
     header->name = string_dup(name);
+    if (!header->name) {
+        free(header);
+        return;
+    }
+    
     header->value = string_dup(value);
+    if (!header->value) {
+        free(header->name);
+        free(header);
+        return;
+    }
+    
     header->next = req->parsed_headers;
     req->parsed_headers = header;
-    
-    if (!header->name || !header->value) {
-        free(header->name);
-        free(header->value);
-        free(header);
-    }
 }
 
 static void add_query_param(httpc_request_t* req, const char* name, const char* value) {
@@ -92,15 +98,20 @@ static void add_query_param(httpc_request_t* req, const char* name, const char* 
     }
     
     param->name = string_dup(name);
+    if (!param->name) {
+        free(param);
+        return;
+    }
+    
     param->value = value ? string_dup(value) : string_dup("");
+    if (!param->value) {
+        free(param->name);
+        free(param);
+        return;
+    }
+    
     param->next = req->parsed_query_params;
     req->parsed_query_params = param;
-    
-    if (!param->name || !param->value) {
-        free(param->name);
-        free(param->value);
-        free(param);
-    }
 }
 
 static void parse_query_string(httpc_request_t* req) {
@@ -196,11 +207,33 @@ int httpc_parse_request(const char* buffer, httpc_request_t* req) {
         return -1;
     }
     
-    char method[16] = {0};
-    char path[512] = {0};
+    size_t headers_section_size = (size_t)(headers_end - buffer + 4);
+    if (headers_section_size > MAX_HEADER_SIZE) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    char method[MAX_METHOD_LENGTH] = {0};
+    char path[MAX_PATH_LENGTH] = {0};
     char http_version[16] = {0};
     
-    if (sscanf(buffer, "%15s %511s %15s", method, path, http_version) != 3) {
+    if (sscanf(buffer, "%15s %2047s %15s", method, path, http_version) != 3) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    if (strlen(method) >= MAX_METHOD_LENGTH) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    if (strlen(path) >= MAX_PATH_LENGTH) {
+        errno = EINVAL;
+        return -1;
+    }
+    
+    if (strncmp(http_version, "HTTP/1.0", 8) != 0 && 
+        strncmp(http_version, "HTTP/1.1", 8) != 0) {
         errno = EINVAL;
         return -1;
     }
@@ -234,6 +267,12 @@ int httpc_parse_request(const char* buffer, httpc_request_t* req) {
         headers_start += 2;
         size_t headers_section_len = headers_end - headers_start;
         
+        if (headers_section_len > MAX_HEADER_SIZE) {
+            errno = EINVAL;
+            httpc_free_request(req);
+            return -1;
+        }
+        
         req->headers = malloc(headers_section_len + 1);
         if (handle_memory_error(req->headers, __func__, __LINE__) == NULL) {
             httpc_free_request(req);
@@ -248,6 +287,12 @@ int httpc_parse_request(const char* buffer, httpc_request_t* req) {
     
     const char* body_start = headers_end + 4;
     size_t body_len = strlen(body_start);
+    
+    if (body_len > MAX_BODY_SIZE) {
+        errno = EINVAL;
+        httpc_free_request(req);
+        return -1;
+    }
     
     if (body_len > 0) {
         req->body = malloc(body_len + 1);
@@ -291,18 +336,8 @@ void httpc_free_request(httpc_request_t* req) {
         qparam = next;
     }
     
-    PathParam* pparam = req->path_params;
-    while (pparam) {
-        PathParam* next = pparam->next;
-        free(pparam->name);
-        free(pparam->value);
-        free(pparam);
-        pparam = next;
-    }
-    
     req->parsed_headers = NULL;
     req->parsed_query_params = NULL;
-    req->path_params = NULL;
     memset(req, 0, sizeof(httpc_request_t));
 }
 
@@ -335,20 +370,6 @@ const char* httpc_get_query_param(httpc_request_t* req, const char* name) {
     if (!req || !name) return NULL;
     
     QueryParam* param = req->parsed_query_params;
-    while (param) {
-        if (param->name && strcmp(param->name, name) == 0) {
-            return param->value;
-        }
-        param = param->next;
-    }
-    
-    return NULL;
-}
-
-const char* httpc_get_path_param(httpc_request_t* req, const char* name) {
-    if (!req || !name) return NULL;
-    
-    PathParam* param = req->path_params;
     while (param) {
         if (param->name && strcmp(param->name, name) == 0) {
             return param->value;

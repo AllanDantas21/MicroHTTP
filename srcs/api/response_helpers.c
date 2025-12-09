@@ -25,6 +25,9 @@ httpc_response_t* httpc_json(int status, cJSON* json) {
 }
 
 httpc_response_t* httpc_json_ok(cJSON* json) {
+    if (!json) {
+        return httpc_json_error(500, "JSON object is null");
+    }
     return httpc_json(200, json);
 }
 

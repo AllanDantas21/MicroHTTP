@@ -7,4 +7,9 @@
 #define BACKLOG 10
 #define DEFAULT_HOST "127.0.0.1"
 
+#define MAX_HEADER_SIZE 8192
+#define MAX_BODY_SIZE 1048576
+#define MAX_METHOD_LENGTH 16
+#define MAX_PATH_LENGTH 2048
+
 #endif

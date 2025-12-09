@@ -19,12 +19,14 @@ char* httpc_extract_json_body(const char* request_buffer) {
         return NULL;
     }
     
-    char *json_body = malloc(strlen(body) + 1);
+    size_t body_len = strlen(body);
+    char *json_body = malloc(body_len + 1);
     if (!json_body) {
         return NULL;
     }
     
-    strcpy(json_body, body);
+    memcpy(json_body, body, body_len);
+    json_body[body_len] = '\0';
     return json_body;
 }
 

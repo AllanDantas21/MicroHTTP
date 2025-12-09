@@ -23,11 +23,24 @@ static void default_on_error(const char* error) {
 }
 
 static int validate_config(const httpc_config_t* config) {
-    if (!config) return (-1);
+    if (!config) {
+        return (-1);
+    }
     
-    if (config->port <= 0 || config->port > 65535) return (-1);
-    if (config->backlog <= 0) return (-1);
-    if (config->max_clients <= 0) return (-1);
+    if (config->port <= 0) {
+        return (-1);
+    }
+    if (config->port > 65535) {
+        return (-1);
+    }
+    
+    if (config->backlog <= 0) {
+        return (-1);
+    }
+    
+    if (config->max_clients <= 0) {
+        return (-1);
+    }
     
     return (0);
 }
@@ -52,6 +65,7 @@ int httpc_configure(const httpc_config_t* config) {
         return (-1);
     }
     
+    errno = 0;
     if (validate_config(config) != 0) {
         errno = EINVAL;
         return (-1);

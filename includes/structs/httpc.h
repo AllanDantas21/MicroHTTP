@@ -24,12 +24,6 @@ typedef struct QueryParam {
     struct QueryParam* next;
 } QueryParam;
 
-typedef struct PathParam {
-    char* name;
-    char* value;
-    struct PathParam* next;
-} PathParam;
-
 typedef struct {
     char* method;
     char* path;
@@ -38,7 +32,6 @@ typedef struct {
     char* query_string;
     HttpHeader* parsed_headers;
     QueryParam* parsed_query_params;
-    PathParam* path_params;
 } httpc_request_t;
 
 #endif

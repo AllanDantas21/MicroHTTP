@@ -158,6 +158,7 @@ int handle_thread_error(int result, const char *function_name, int line_number) 
 }
 
 int init_error_handling_system(void) {
+    errno = 0;
     openlog("MicroHTTP-Debug", LOG_PID | LOG_CONS, LOG_USER);
     
     if (errno != 0) {

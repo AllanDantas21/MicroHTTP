@@ -146,6 +146,7 @@ int httpc_stop(void) {
     if (g_server_socket != -1) {
         close(g_server_socket);
         g_server_socket = -1;
+        errno = 0;
     }
     
     
@@ -168,12 +169,14 @@ int httpc_setup_signals(void) {
         return (-1);
     }
     
+    errno = 0;
     __sighandler_t sigterm_result = signal(SIGTERM, signal_handler);
     if (sigterm_result == SIG_ERR) { 
         debug_error_detailed(__func__, __LINE__, errno, "Failed to configure handler for SIGTERM");
         return (-1);
     }
     
+    errno = 0; 
     return (0);
 }
 

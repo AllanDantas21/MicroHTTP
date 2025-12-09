@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 // Test to verify if initialization works - SHOULD return 0
 TEST test_httpc_init(void) {
@@ -14,16 +15,17 @@ TEST test_httpc_init(void) {
 
 // Test to verify if configuration works - SHOULD return 0
 TEST test_httpc_configure(void) {
-    httpc_config_t config = {
-        .port = 8080,
-        .backlog = 10,
-        .max_clients = 10,
-        .on_request = NULL,
-        .on_error = NULL
-    };
+    errno = 0;
+    
+    httpc_config_t config;
+    memset(&config, 0, sizeof(httpc_config_t));
+    config.port = 8080;
+    config.backlog = 10;
+    config.max_clients = 10;
+    config.on_request = NULL;
+    config.on_error = NULL;
     
     int result = httpc_configure(&config);
-    printf("Debug: httpc_configure returned %d, errno = %d\n", result, errno);
     ASSERT_EQ(0, result);
     PASS();
 }
@@ -123,9 +125,9 @@ TEST test_httpc_parse_json(void) {
 
 // Test to verify if route addition works - SHOULD return 0
 TEST test_httpc_add_route(void) {
-    char* test_handler(const char* buffer) {
-        (void)buffer;
-        return build_response(200, "text/plain", "Teste");
+    httpc_response_t* test_handler(httpc_request_t* req) {
+        (void)req;
+        return httpc_create_response(200, "text/plain", "Teste");
     }
     
     int result = httpc_add_route(&g_router, "GET", "test", test_handler);

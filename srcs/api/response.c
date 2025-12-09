@@ -12,11 +12,16 @@ httpc_response_t* httpc_create_response(int status_code, const char* content_typ
     }
     
     response->status_code = status_code;
-    response->content_type = content_type ? string_dup(content_type) : string_dup("text/plain");
-    response->body = body ? string_dup(body) : string_dup("");
     response->headers = NULL;
     
-    if (!response->content_type || !response->body) {
+    response->content_type = content_type ? string_dup(content_type) : string_dup("text/plain");
+    if (!response->content_type) {
+        httpc_free_response(response);
+        return NULL;
+    }
+    
+    response->body = body ? string_dup(body) : string_dup("");
+    if (!response->body) {
         httpc_free_response(response);
         return NULL;
     }
@@ -55,18 +60,59 @@ char* httpc_build_headers(int status_code, const char* content_type, size_t cont
     }
 
     char* ptr = headers;
-    ptr += sprintf(ptr, "HTTP/1.1 %d %s\r\n", status_code, status_text);
-    ptr += sprintf(ptr, "Content-Type: %s\r\n", content_type ? content_type : "text/plain");
-    ptr += sprintf(ptr, "Content-Length: %zu\r\n", content_length);
+    size_t remaining = total_size;
+    
+    int written = snprintf(ptr, remaining, "HTTP/1.1 %d %s\r\n", status_code, status_text);
+    if (written < 0 || (size_t)written >= remaining) {
+        free(headers);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
+    
+    written = snprintf(ptr, remaining, "Content-Type: %s\r\n", content_type ? content_type : "text/plain");
+    if (written < 0 || (size_t)written >= remaining) {
+        free(headers);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
+    
+    written = snprintf(ptr, remaining, "Content-Length: %zu\r\n", content_length);
+    if (written < 0 || (size_t)written >= remaining) {
+        free(headers);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
 
     if (extra_headers && *extra_headers) {
-        ptr += sprintf(ptr, "%s", extra_headers);
+        size_t extra_len = strlen(extra_headers);
+        if (extra_len > remaining - 3) {
+            free(headers);
+            return NULL;
+        }
+        memcpy(ptr, extra_headers, extra_len);
+        ptr += extra_len;
+        remaining -= extra_len;
+        
         if (extra_headers[strlen(extra_headers) - 1] != '\n') {
-            ptr += sprintf(ptr, "\r\n");
+            if (remaining < 3) {
+                free(headers);
+                return NULL;
+            }
+            memcpy(ptr, "\r\n", 2);
+            ptr += 2;
+            remaining -= 2;
         }
     }
 
-    ptr += sprintf(ptr, "\r\n");
+    if (remaining < 2) {
+        free(headers);
+        return NULL;
+    }
+    memcpy(ptr, "\r\n", 2);
+    ptr[2] = '\0';
 
     return headers;
 }
@@ -122,20 +168,68 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     }
     
     char* ptr = result;
+    size_t remaining = total_size;
     
-    ptr += sprintf(ptr, "HTTP/1.1 %d %s\r\n", response->status_code, status_text);
-    ptr += sprintf(ptr, "Content-Type: %s\r\n", response->content_type);
-    ptr += sprintf(ptr, "Content-Length: %zu\r\n", strlen(response->body));
+    int written = snprintf(ptr, remaining, "HTTP/1.1 %d %s\r\n", response->status_code, status_text);
+    if (written < 0 || (size_t)written >= remaining) {
+        free(result);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
+    
+    written = snprintf(ptr, remaining, "Content-Type: %s\r\n", response->content_type);
+    if (written < 0 || (size_t)written >= remaining) {
+        free(result);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
+    
+    size_t body_len = strlen(response->body);
+    written = snprintf(ptr, remaining, "Content-Length: %zu\r\n", body_len);
+    if (written < 0 || (size_t)written >= remaining) {
+        free(result);
+        return NULL;
+    }
+    ptr += written;
+    remaining -= (size_t)written;
     
     if (response->headers) {
-        ptr += sprintf(ptr, "%s", response->headers);
+        size_t headers_len = strlen(response->headers);
+        if (headers_len > remaining - 3) {
+            free(result);
+            return NULL;
+        }
+        memcpy(ptr, response->headers, headers_len);
+        ptr += headers_len;
+        remaining -= headers_len;
+        
         if (response->headers[strlen(response->headers) - 1] != '\n') {
-            ptr += sprintf(ptr, "\r\n");
+            if (remaining < 3) {
+                free(result);
+                return NULL;
+            }
+            memcpy(ptr, "\r\n", 2);
+            ptr += 2;
+            remaining -= 2;
         }
     }
     
-    ptr += sprintf(ptr, "\r\n");
-    ptr += sprintf(ptr, "%s", response->body);
+    if (remaining < 3) {
+        free(result);
+        return NULL;
+    }
+    memcpy(ptr, "\r\n", 2);
+    ptr += 2;
+    remaining -= 2;
+    
+    if (body_len > remaining) {
+        free(result);
+        return NULL;
+    }
+    memcpy(ptr, response->body, body_len);
+    ptr[body_len] = '\0';
     
     return (result);
 }
@@ -157,13 +251,23 @@ void httpc_set_header(httpc_response_t* response, const char* key, const char* v
         }
         
         response->headers = new_headers;
-        sprintf(response->headers + current_size, "%s: %s\r\n", key, value);
+        int written = snprintf(response->headers + current_size, header_size + 1, "%s: %s\r\n", key, value);
+        if (written < 0 || (size_t)written > header_size) {
+            free(response->headers);
+            response->headers = NULL;
+            return;
+        }
     } else {
         response->headers = malloc(header_size + 1);
         if (handle_memory_error(response->headers, __func__, __LINE__) == NULL) {
             return;
         }
         
-        sprintf(response->headers, "%s: %s\r\n", key, value);
+        int written = snprintf(response->headers, header_size + 1, "%s: %s\r\n", key, value);
+        if (written < 0 || (size_t)written > header_size) {
+            free(response->headers);
+            response->headers = NULL;
+            return;
+        }
     }
 }
