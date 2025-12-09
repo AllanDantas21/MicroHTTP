@@ -4,6 +4,61 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
+
+static int safe_snprintf(char** ptr, size_t* remaining, char** buffer_to_free,
+                         const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    int written = vsnprintf(*ptr, *remaining, format, args);
+    va_end(args);
+    
+    if (written < 0 || (size_t)written >= *remaining) {
+        if (buffer_to_free && *buffer_to_free) {
+            free(*buffer_to_free);
+            *buffer_to_free = NULL;
+        }
+        return 0;
+    }
+    
+    *ptr += written;
+    *remaining -= (size_t)written;
+    return 1;
+}
+
+static int safe_memcpy(char** ptr, size_t* remaining, char** buffer_to_free,
+                       const void* src, size_t len) {
+    if (len > *remaining) {
+        if (buffer_to_free && *buffer_to_free) {
+            free(*buffer_to_free);
+            *buffer_to_free = NULL;
+        }
+        return 0;
+    }
+    
+    memcpy(*ptr, src, len);
+    *ptr += len;
+    *remaining -= len;
+    return 1;
+}
+
+static int safe_add_terminator(char** ptr, size_t* remaining, char** buffer_to_free,
+                               const char* terminator, size_t term_len) {
+    if (term_len > *remaining) {
+        if (buffer_to_free && *buffer_to_free) {
+            free(*buffer_to_free);
+            *buffer_to_free = NULL;
+        }
+        return 0;
+    }
+    
+    memcpy(*ptr, terminator, term_len);
+    *ptr += term_len;
+    *remaining -= term_len;
+    (*ptr)[0] = '\0';
+    return 1;
+}
 
 httpc_response_t* httpc_create_response(int status_code, const char* content_type, const char* body) {
     httpc_response_t* response = malloc(sizeof(httpc_response_t));
@@ -62,57 +117,35 @@ char* httpc_build_headers(int status_code, const char* content_type, size_t cont
     char* ptr = headers;
     size_t remaining = total_size;
     
-    int written = snprintf(ptr, remaining, "HTTP/1.1 %d %s\r\n", status_code, status_text);
-    if (written < 0 || (size_t)written >= remaining) {
-        free(headers);
+    if (!safe_snprintf(&ptr, &remaining, &headers, "HTTP/1.1 %d %s\r\n", status_code, status_text)) {
         return NULL;
     }
-    ptr += written;
-    remaining -= (size_t)written;
     
-    written = snprintf(ptr, remaining, "Content-Type: %s\r\n", content_type ? content_type : "text/plain");
-    if (written < 0 || (size_t)written >= remaining) {
-        free(headers);
+    if (!safe_snprintf(&ptr, &remaining, &headers, "Content-Type: %s\r\n", 
+                       content_type ? content_type : "text/plain")) {
         return NULL;
     }
-    ptr += written;
-    remaining -= (size_t)written;
     
-    written = snprintf(ptr, remaining, "Content-Length: %zu\r\n", content_length);
-    if (written < 0 || (size_t)written >= remaining) {
-        free(headers);
+    if (!safe_snprintf(&ptr, &remaining, &headers, "Content-Length: %zu\r\n", content_length)) {
         return NULL;
     }
-    ptr += written;
-    remaining -= (size_t)written;
 
     if (extra_headers && *extra_headers) {
         size_t extra_len = strlen(extra_headers);
-        if (extra_len > remaining - 3) {
-            free(headers);
+        if (!safe_memcpy(&ptr, &remaining, &headers, extra_headers, extra_len)) {
             return NULL;
         }
-        memcpy(ptr, extra_headers, extra_len);
-        ptr += extra_len;
-        remaining -= extra_len;
         
         if (extra_headers[strlen(extra_headers) - 1] != '\n') {
-            if (remaining < 3) {
-                free(headers);
+            if (!safe_memcpy(&ptr, &remaining, &headers, "\r\n", 2)) {
                 return NULL;
             }
-            memcpy(ptr, "\r\n", 2);
-            ptr += 2;
-            remaining -= 2;
         }
     }
 
-    if (remaining < 2) {
-        free(headers);
+    if (!safe_add_terminator(&ptr, &remaining, &headers, "\r\n", 2)) {
         return NULL;
     }
-    memcpy(ptr, "\r\n", 2);
-    ptr[2] = '\0';
 
     return headers;
 }
@@ -169,67 +202,41 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     
     char* ptr = result;
     size_t remaining = total_size;
-    
-    int written = snprintf(ptr, remaining, "HTTP/1.1 %d %s\r\n", response->status_code, status_text);
-    if (written < 0 || (size_t)written >= remaining) {
-        free(result);
-        return NULL;
-    }
-    ptr += written;
-    remaining -= (size_t)written;
-    
-    written = snprintf(ptr, remaining, "Content-Type: %s\r\n", response->content_type);
-    if (written < 0 || (size_t)written >= remaining) {
-        free(result);
-        return NULL;
-    }
-    ptr += written;
-    remaining -= (size_t)written;
-    
     size_t body_len = strlen(response->body);
-    written = snprintf(ptr, remaining, "Content-Length: %zu\r\n", body_len);
-    if (written < 0 || (size_t)written >= remaining) {
-        free(result);
+    
+    if (!safe_snprintf(&ptr, &remaining, &result, "HTTP/1.1 %d %s\r\n", response->status_code, status_text)) {
         return NULL;
     }
-    ptr += written;
-    remaining -= (size_t)written;
+    
+    if (!safe_snprintf(&ptr, &remaining, &result, "Content-Type: %s\r\n", response->content_type)) {
+        return NULL;
+    }
+    
+    if (!safe_snprintf(&ptr, &remaining, &result, "Content-Length: %zu\r\n", body_len)) {
+        return NULL;
+    }
     
     if (response->headers) {
         size_t headers_len = strlen(response->headers);
-        if (headers_len > remaining - 3) {
-            free(result);
+        if (!safe_memcpy(&ptr, &remaining, &result, response->headers, headers_len)) {
             return NULL;
         }
-        memcpy(ptr, response->headers, headers_len);
-        ptr += headers_len;
-        remaining -= headers_len;
         
         if (response->headers[strlen(response->headers) - 1] != '\n') {
-            if (remaining < 3) {
-                free(result);
+            if (!safe_memcpy(&ptr, &remaining, &result, "\r\n", 2)) {
                 return NULL;
             }
-            memcpy(ptr, "\r\n", 2);
-            ptr += 2;
-            remaining -= 2;
         }
     }
     
-    if (remaining < 3) {
-        free(result);
+    if (!safe_memcpy(&ptr, &remaining, &result, "\r\n", 2)) {
         return NULL;
     }
-    memcpy(ptr, "\r\n", 2);
-    ptr += 2;
-    remaining -= 2;
     
-    if (body_len > remaining) {
-        free(result);
+    if (!safe_memcpy(&ptr, &remaining, &result, response->body, body_len)) {
         return NULL;
     }
-    memcpy(ptr, response->body, body_len);
-    ptr[body_len] = '\0';
+    ptr[0] = '\0';
     
     return (result);
 }
