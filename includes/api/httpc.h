@@ -26,7 +26,9 @@
 #include "structs/httpc.h"
 #include "core/router.h"
 #include "core/server.h"
+#include "core/request_parser.h"
 #include "json/json_utils.h"
+#include "api/response_helpers.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +54,7 @@ int httpc_configure(const httpc_config_t* config);
  * @param router Pointer to the router instance
  * @param method HTTP method (GET, POST, PUT, DELETE, etc.)
  * @param path Route path
- * @param handler Function that processes the request
+ * @param handler Function that processes the request (receives httpc_request_t* and returns httpc_response_t*)
  * @return 0 on success, -1 on error
  */
 int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler);

@@ -1,12 +1,15 @@
 #include "api/httpc.h"
 #include "core/error_handling.h"
 #include "core/logger.h"
+#include "core/request_parser.h"
+#include "api/response.h"
 #include <arpa/inet.h>
 #include "core/server.h"
 #include "structs/connection.h"
 #include <sys/epoll.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h>
 
 int allocate_buffer(char **buffer, size_t size) {
     *buffer = malloc(size);
@@ -197,19 +200,56 @@ void main_handler(int serverSocket) {
 							char path[256] = {0};
 							char *response = NULL;
 
-							if (sscanf(conn->buffer, "%15s %255s", method, path) != 2) {
-								response = build_response(400, "text/plain", "Bad Request");
-							} else {
-								const char *route = (path[0] == '/') ? path + 1 : path;
-								route_handler h = router_match(&g_router, method, route);
-								if (h) {
-									response = h(conn->buffer);
-								} else {
-									response = build_response(404, "text/plain", "Not Found");
-								}
+							httpc_request_t* req = malloc(sizeof(httpc_request_t));
+							if (!req) {
+								response = build_response(500, "text/plain", "Internal Server Error");
+								conn->response = response;
+								conn->response_len = strlen(response);
+								conn->response_sent = 0;
+								conn->state = CONNECTION_STATE_SEND;
+								mod_epoll_fd(epoll_fd, conn->fd, EPOLLOUT | EPOLLET, conn);
+								break;
 							}
+
+							if (httpc_parse_request(conn->buffer, req) != 0) {
+								httpc_free_request(req);
+								free(req);
+								response = build_response(400, "text/plain", "Bad Request");
+								conn->response = response;
+								conn->response_len = strlen(response);
+								conn->response_sent = 0;
+								conn->state = CONNECTION_STATE_SEND;
+								mod_epoll_fd(epoll_fd, conn->fd, EPOLLOUT | EPOLLET, conn);
+								break;
+							}
+
+							strncpy(method, req->method ? req->method : "", sizeof(method) - 1);
+							method[sizeof(method) - 1] = '\0';
+							strncpy(path, req->path ? req->path : "", sizeof(path) - 1);
+							path[sizeof(path) - 1] = '\0';
+
+							const char *route = (path[0] == '/') ? path + 1 : path;
+							route_handler h = router_match(&g_router, method, route);
+							
+							httpc_response_t* httpc_response = NULL;
+							if (h) {
+								httpc_response = h(req);
+							} else {
+								httpc_response = httpc_create_response(404, "text/plain", "Not Found");
+							}
+
+							if (httpc_response) {
+								response = httpc_response_to_string(httpc_response);
+								httpc_free_response(httpc_response);
+							} else {
+								response = build_response(500, "text/plain", "Internal Server Error");
+							}
+
+							httpc_free_request(req);
+							free(req);
+
 							conn->response = response;
-							conn->response_len = strlen(response);
+							conn->response_len = response ? strlen(response) : 0;
 							conn->response_sent = 0;
 
 							http_status status = get_response_status(response);

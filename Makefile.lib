@@ -17,10 +17,12 @@ INCLUDE_DIR = includes
 HTTPC_SOURCES = \
 	$(SRCS_DIR)/api/httpc_lib.c \
 	$(SRCS_DIR)/api/response.c \
+	$(SRCS_DIR)/api/response_helpers.c \
 	$(SRCS_DIR)/core/config.c \
 	$(SRCS_DIR)/core/utils.c \
 	$(SRCS_DIR)/core/server.c \
 	$(SRCS_DIR)/core/router.c \
+	$(SRCS_DIR)/core/request_parser.c \
 	$(SRCS_DIR)/core/handlers/handler.c \
 	$(SRCS_DIR)/core/user_logger.c \
 	$(SRCS_DIR)/core/error_handling.c \
@@ -29,7 +31,7 @@ HTTPC_SOURCES = \
 
 HTTPC_OBJS = $(HTTPC_SOURCES:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
 
-EXAMPLES = examples/simple_server
+EXAMPLES = examples/simple_server examples/request_api_example
 
 all: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so examples
 
@@ -63,6 +65,9 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c | $(OBJS_DIR)
 examples: $(EXAMPLES)
 
 examples/simple_server: examples/simple_server.c $(LIB_DIR)/$(LIB_NAME).a
+	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -Wl,-rpath,$(shell pwd)/$(LIB_DIR)
+
+examples/request_api_example: examples/request_api_example.c $(LIB_DIR)/$(LIB_NAME).a
 	$(CC) $(CFLAGS) -o $@ $< -L$(LIB_DIR) -lhttpc -Wl,-rpath,$(shell pwd)/$(LIB_DIR)
 
 install: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so

@@ -172,3 +172,10 @@ void httpc_json_free(cJSON* json) {
         cJSON_Delete(json);
     }
 }
+
+cJSON* httpc_parse_json_body(httpc_request_t* req) {
+    if (!req || !req->body) {
+        return NULL;
+    }
+    return httpc_parse_json(req->body);
+}

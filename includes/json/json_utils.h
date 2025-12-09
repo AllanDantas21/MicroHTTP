@@ -12,6 +12,7 @@ extern "C" {
 
 char* httpc_extract_json_body(const char* request_buffer);
 cJSON* httpc_parse_json(const char* json_string);
+cJSON* httpc_parse_json_body(httpc_request_t* req);
 httpc_response_t* httpc_create_json_response(int status_code, cJSON* json_object);
 httpc_response_t* httpc_create_json_error_response(int status_code, const char* error_message);
 httpc_response_t* httpc_create_json_success_response(const char* message, cJSON* data);
