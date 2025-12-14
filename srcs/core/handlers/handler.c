@@ -299,9 +299,18 @@ void main_handler(int serverSocket) {
 						goto next_event;
 					}
 				}
-				if (conn->response_sent >= conn->response_len) {
-					remove_connection(epoll_fd, conn);
-				}
+			if (conn->response_sent >= conn->response_len) {
+				free(conn->response);
+				conn->response = NULL;
+				conn->response_len = 0;
+				conn->response_sent = 0;
+				
+				conn->buffer_len = 0;
+				memset(conn->buffer, 0, sizeof(conn->buffer));
+				
+				conn->state = CONNECTION_STATE_RECV;
+				mod_epoll_fd(epoll_fd, conn->fd, EPOLLIN | EPOLLET, conn);
+			}
 			}
 
 			next_event: ;

@@ -99,6 +99,7 @@ char* httpc_build_headers(int status_code, const char* content_type, size_t cont
     total_size += snprintf(NULL, 0, "HTTP/1.1 %d %s\r\n", status_code, status_text);
     total_size += snprintf(NULL, 0, "Content-Type: %s\r\n", content_type ? content_type : "text/plain");
     total_size += snprintf(NULL, 0, "Content-Length: %zu\r\n", content_length);
+    total_size += snprintf(NULL, 0, "Connection: keep-alive\r\n");
 
     if (extra_headers && *extra_headers) {
         total_size += strlen(extra_headers);
@@ -127,6 +128,10 @@ char* httpc_build_headers(int status_code, const char* content_type, size_t cont
     }
     
     if (!safe_snprintf(&ptr, &remaining, &headers, "Content-Length: %zu\r\n", content_length)) {
+        return NULL;
+    }
+    
+    if (!safe_snprintf(&ptr, &remaining, &headers, "Connection: keep-alive\r\n")) {
         return NULL;
     }
 
@@ -184,6 +189,7 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     total_size += snprintf(NULL, 0, "HTTP/1.1 %d %s\r\n", response->status_code, status_text);
     total_size += snprintf(NULL, 0, "Content-Type: %s\r\n", response->content_type);
     total_size += snprintf(NULL, 0, "Content-Length: %zu\r\n", strlen(response->body));
+    total_size += snprintf(NULL, 0, "Connection: keep-alive\r\n");
     
     if (response->headers) {
         total_size += strlen(response->headers);
@@ -213,6 +219,10 @@ char* httpc_response_to_string(const httpc_response_t* response) {
     }
     
     if (!safe_snprintf(&ptr, &remaining, &result, "Content-Length: %zu\r\n", body_len)) {
+        return NULL;
+    }
+    
+    if (!safe_snprintf(&ptr, &remaining, &result, "Connection: keep-alive\r\n")) {
         return NULL;
     }
     
