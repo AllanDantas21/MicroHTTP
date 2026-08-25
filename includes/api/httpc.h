@@ -34,7 +34,15 @@
 extern "C" {
 #endif
 
-extern Router g_router;
+
+httpc_server_t *httpc_server_create(const httpc_config_t *config);
+int httpc_server_start(httpc_server_t *server);
+int httpc_server_run(httpc_server_t *server);
+int httpc_server_stop(httpc_server_t *server);
+void httpc_server_destroy(httpc_server_t *server);
+int httpc_server_is_running(const httpc_server_t *server);
+int httpc_server_add_route(httpc_server_t *server, const char *method,
+						   const char *path, route_handler handler);
 
 /**
  * @brief Initialize the HTTP.c library
@@ -48,16 +56,6 @@ int httpc_init(void);
  * @return 0 on success, -1 on error
  */
 int httpc_configure(const httpc_config_t* config);
-
-/**
- * @brief Add a route to the server
- * @param router Pointer to the router instance
- * @param method HTTP method (GET, POST, PUT, DELETE, etc.)
- * @param path Route path
- * @param handler Function that processes the request (receives httpc_request_t* and returns httpc_response_t*)
- * @return 0 on success, -1 on error
- */
-int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler);
 
 /**
  * @brief Start the HTTP server
@@ -139,13 +137,6 @@ const httpc_config_t* httpc_get_config(void);
  * @return Socket descriptor or -1 if not active
  */
 int httpc_get_server_socket(void);
-
-/**
- * @brief Main event loop handler. Blocks and handles connections/events.
- */
-void main_handler(int serverSocket);
-
-
 
 #ifdef __cplusplus
 }

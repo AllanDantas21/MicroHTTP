@@ -62,13 +62,3 @@ void router_cleanup(Router* router) {
 	
 	router->routes_head = NULL;
 }
-
-int httpc_add_route(Router* router, const char* method, const char* path, route_handler handler) {
-    if (!router || !method || !path || !handler) {
-        errno = EINVAL;
-        return (-1);
-    }
-    
-    router_add(router, method, path, handler);
-    return (0);
-}

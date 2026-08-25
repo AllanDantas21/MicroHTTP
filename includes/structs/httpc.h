@@ -1,6 +1,8 @@
 #ifndef HTTPC_STRUCTS_H
 #define HTTPC_STRUCTS_H
 
+typedef struct httpc_server httpc_server_t;
+
 typedef struct {
     int port;
     int backlog;

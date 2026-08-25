@@ -130,8 +130,28 @@ TEST test_httpc_add_route(void) {
         return httpc_create_response(200, "text/plain", "Teste");
     }
     
-    int result = httpc_add_route(&g_router, "GET", "test", test_handler);
+    httpc_config_t config = { .port = 18081, .backlog = 4, .max_clients = 2 };
+    httpc_server_t *server = httpc_server_create(&config);
+    ASSERT(server != NULL);
+    int result = httpc_server_add_route(server, "GET", "test", test_handler);
     ASSERT_EQ(0, result);
+    httpc_server_destroy(server);
+    PASS();
+}
+
+TEST test_httpc_server_lifecycle(void) {
+    httpc_config_t config;
+    memset(&config, 0, sizeof(config));
+    config.port = 18080;
+    config.backlog = 4;
+    config.max_clients = 2;
+
+    httpc_server_t *server = httpc_server_create(&config);
+    ASSERT(server != NULL);
+    ASSERT_EQ(0, httpc_server_start(server));
+    ASSERT(httpc_server_is_running(server) == 0);
+    ASSERT(httpc_server_stop(server) == 0);
+    httpc_server_destroy(server);
     PASS();
 }
 
@@ -150,6 +170,7 @@ SUITE(suite_httpc) {
     RUN_TEST(test_httpc_extract_json_body);
     RUN_TEST(test_httpc_parse_json);
     RUN_TEST(test_httpc_add_route);
+    RUN_TEST(test_httpc_server_lifecycle);
     RUN_TEST(test_httpc_cleanup);
 }
 

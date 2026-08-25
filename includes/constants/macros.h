@@ -1,11 +1,11 @@
 #ifndef HTTPC_MACROS_H
 #define HTTPC_MACROS_H
 
-#define HTTPC_GET(path, handler) httpc_add_route(&g_router, "GET", path, handler)
-#define HTTPC_POST(path, handler) httpc_add_route(&g_router, "POST", path, handler)
-#define HTTPC_PUT(path, handler) httpc_add_route(&g_router, "PUT", path, handler)
-#define HTTPC_DELETE(path, handler) httpc_add_route(&g_router, "DELETE", path, handler)
-#define HTTPC_PATCH(path, handler) httpc_add_route(&g_router, "PATCH", path, handler)
+#define HTTPC_GET(server, path, handler) httpc_server_add_route(server, "GET", path, handler)
+#define HTTPC_POST(server, path, handler) httpc_server_add_route(server, "POST", path, handler)
+#define HTTPC_PUT(server, path, handler) httpc_server_add_route(server, "PUT", path, handler)
+#define HTTPC_DELETE(server, path, handler) httpc_server_add_route(server, "DELETE", path, handler)
+#define HTTPC_PATCH(server, path, handler) httpc_server_add_route(server, "PATCH", path, handler)
 
 #define HTTPC_OK(response) httpc_create_response(200, "text/plain", response)
 #define HTTPC_CREATED(response) httpc_create_response(201, "text/plain", response)

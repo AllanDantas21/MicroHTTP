@@ -183,14 +183,27 @@ int main(void) {
         return 1;
     }
     
-    httpc_add_route(&g_router, "GET", "", handle_home);
-    httpc_add_route(&g_router, "GET", "query", handle_query_params);
-    httpc_add_route(&g_router, "GET", "headers", handle_headers);
-    httpc_add_route(&g_router, "GET", "info", handle_request_info);
-    httpc_add_route(&g_router, "POST", "json", handle_json_body);
-    httpc_add_route(&g_router, "POST", "combined", handle_combined_example);
-    httpc_add_route(&g_router, "GET", "validate", handle_validation_example);
-    
-    return httpc_start();
+    httpc_server_t *server = httpc_server_create(&config);
+    if (!server) {
+        httpc_cleanup();
+        return 1;
+    }
+    httpc_server_add_route(server, "GET", "", handle_home);
+    httpc_server_add_route(server, "GET", "query", handle_query_params);
+    httpc_server_add_route(server, "GET", "headers", handle_headers);
+    httpc_server_add_route(server, "GET", "info", handle_request_info);
+    httpc_server_add_route(server, "POST", "json", handle_json_body);
+    httpc_server_add_route(server, "POST", "combined", handle_combined_example);
+    httpc_server_add_route(server, "GET", "validate", handle_validation_example);
+
+    if (httpc_server_start(server) != 0) {
+        httpc_server_destroy(server);
+        httpc_cleanup();
+        return 1;
+    }
+    int result = httpc_server_run(server);
+    httpc_server_destroy(server);
+    httpc_cleanup();
+    return result;
 }
 

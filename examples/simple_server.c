@@ -55,9 +55,22 @@ int main(void) {
         return 1;
     }
     
-    httpc_add_route(&g_router, "GET", "", handle_home);
-    httpc_add_route(&g_router, "GET", "status", handle_api_status);
-    httpc_add_route(&g_router, "POST", "json/echo", handle_json_echo);
-    
-    return httpc_start();
+    httpc_server_t *server = httpc_server_create(&config);
+    if (!server) {
+        httpc_cleanup();
+        return 1;
+    }
+    httpc_server_add_route(server, "GET", "", handle_home);
+    httpc_server_add_route(server, "GET", "status", handle_api_status);
+    httpc_server_add_route(server, "POST", "json/echo", handle_json_echo);
+
+    if (httpc_server_start(server) != 0) {
+        httpc_server_destroy(server);
+        httpc_cleanup();
+        return 1;
+    }
+    int result = httpc_server_run(server);
+    httpc_server_destroy(server);
+    httpc_cleanup();
+    return result;
 }
